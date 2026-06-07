@@ -51,3 +51,65 @@
     </script>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Abdo OS - Start Menu</title>
+    <style>
+        body { margin: 0; background: #2c3e50; font-family: sans-serif; overflow: hidden; }
+        
+        /* النافذة */
+        .window { position: absolute; top: 50px; left: 50px; width: 250px; height: 150px; background: #fff; border-radius: 8px; box-shadow: 2px 2px 10px #000; }
+        .title-bar { padding: 10px; background: #34495e; color: #fff; cursor: move; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between; }
+        
+        /* شريط المهام السفلي */
+        .taskbar { position: fixed; bottom: 0; width: 100%; height: 50px; background: #222; display: flex; align-items: center; padding: 0 10px; }
+        .start-btn { background: #3498db; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        
+        /* قائمة ابدأ */
+        .start-menu { position: fixed; bottom: 55px; left: 10px; width: 200px; background: #333; color: white; display: none; padding: 10px; border-radius: 5px; }
+        .menu-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #444; }
+        .menu-item:hover { background: #555; }
+    </style>
+</head>
+<body>
+
+    <div class="window" id="win1">
+        <div class="title-bar" id="handle">نافذة المساعد <span>X</span></div>
+        <div style="padding: 10px;">أهلاً بك في نظامك!</div>
+    </div>
+
+    <div class="taskbar">
+        <div class="start-btn" onclick="toggleStart()">ابدأ</div>
+    </div>
+
+    <div class="start-menu" id="startMenu">
+        <div class="menu-item" onclick="alert('فتح المساعد...')">🤖 المساعد</div>
+        <div class="menu-item" onclick="alert('فتح الإعدادات...')">⚙️ الإعدادات</div>
+        <div class="menu-item" onclick="window.location.reload()">🔄 تحديث النظام</div>
+    </div>
+
+    <script>
+        // كود القائمة
+        function toggleStart() {
+            const menu = document.getElementById('startMenu');
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        }
+
+        // كود تحريك النافذة (سابق)
+        const win = document.getElementById("win1");
+        const handle = document.getElementById("handle");
+        let isDragging = false;
+        handle.onmousedown = () => isDragging = true;
+        document.onmouseup = () => isDragging = false;
+        document.onmousemove = (e) => {
+            if (isDragging) {
+                win.style.left = e.pageX - 100 + "px";
+                win.style.top = e.pageY - 20 + "px";
+            }
+        };
+    </script>
+</body>
+</html>
