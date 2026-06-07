@@ -1,65 +1,66 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <title>Abdo OS Pro</title>
     <style>
-        body { margin: 0; background: url('https://w.wallhaven.cc/full/y8/wallhaven-y8j5z9.jpg') center/cover fixed; font-family: sans-serif; overflow: hidden; }
-        .window { position: absolute; width: 300px; height: 250px; background: #fff; border-radius: 8px; box-shadow: 0 0 10px #000; display: none; }
-        .bar { background: #333; color: white; padding: 5px; cursor: move; display: flex; justify-content: space-between; }
-        .taskbar { position: fixed; bottom: 0; width: 100%; height: 50px; background: rgba(0,0,0,0.8); color: white; display: flex; align-items: center; padding: 0 10px; }
-        .menu { position: fixed; bottom: 50px; left: 0; width: 200px; background: #222; display: none; padding: 10px; color: white; }
-        .app-icon { padding: 10px; cursor: pointer; border-bottom: 1px solid #444; }
+        body { margin: 0; background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+        #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+        input { padding: 15px; border-radius: 10px; border: none; margin: 10px; width: 80%; max-width: 300px; text-align: center; }
+        button { padding: 15px 30px; background: #00d4ff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 5px; }
+        .drawer { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; }
+        .app-item { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .app-item:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
+        .icon { font-size: 40px; margin-bottom: 10px; }
+        #status { margin-top: 20px; color: #00d4ff; font-size: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="lock" style="position:fixed; width:100%; height:100%; background:#000; z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white;">
-        <h2>🔐 نظام عبده</h2>
-        <input type="password" id="p" placeholder="كلمة المرور: 123">
-        <button onclick="check()">دخول</button>
+    <div id="lockScreen">
+        <h2>🔒 قفل النظام</h2>
+        <input type="password" id="pass" placeholder="كلمة المرور: 123">
+        <button onclick="checkPass()">دخول</button>
     </div>
 
-    <div id="win1" class="window">
-        <div class="bar" onmousedown="drag(this.parentElement)">التطبيق <span>X</span></div>
-        <div id="app-content" style="padding:10px;"></div>
-    </div>
-
-    <div class="taskbar">
-        <div onclick="toggleMenu()" style="cursor:pointer; background:#00d4ff; padding:10px;">ابدأ</div>
-        <div id="clock" style="margin-right:20px;"></div>
-    </div>
-
-    <div id="menu" class="menu">
-        <div class="app-icon" onclick="openApp('calc')">🧮 آلة حاسبة</div>
-        <div class="app-icon" onclick="openApp('note')">📝 مفكرة</div>
-        <div class="app-icon" onclick="openApp('browser')">🌐 متصفح</div>
-        <div class="app-icon" onclick="openApp('ai')">🤖 المساعد</div>
+    <div id="mainContent" style="display:none; text-align:center;">
+        <h1>Abdo AI Pro</h1>
+        <button id="mic" onclick="startAI()">تحدث مع المساعد 🎙️</button>
+        <p id="status">اضغط للتحدث...</p>
+        
+        <div class="drawer">
+            <div class="app-item" onclick="window.open('https://google.com')">
+                <div class="icon">🌐</div>
+                <div>جوجل</div>
+            </div>
+            <div class="app-item" onclick="window.location.reload()">
+                <div class="icon">🔄</div>
+                <div>إعادة تحميل</div>
+            </div>
+        </div>
     </div>
 
     <script>
-        function check() { if(document.getElementById('p').value == '123') document.getElementById('lock').style.display='none'; }
-        function toggleMenu() { document.getElementById('menu').style.display = (document.getElementById('menu').style.display == 'block' ? 'none' : 'block'); }
-        
-        function openApp(app) {
-            const win = document.getElementById('win1');
-            const cont = document.getElementById('app-content');
-            win.style.display = 'block';
-            if(app == 'calc') cont.innerHTML = "0 + 0 = 0";
-            if(app == 'note') cont.innerHTML = "<textarea></textarea>";
-            if(app == 'browser') cont.innerHTML = "<input value='https://google.com'>";
-            if(app == 'ai') cont.innerHTML = "أنا المساعد الذكي...";
-            toggleMenu();
+        function checkPass() {
+            if(document.getElementById('pass').value == "123") {
+                document.getElementById('lockScreen').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+            } else { alert("كلمة المرور خطأ!"); }
         }
 
-        function drag(elm) {
-            elm.onmousedown = (e) => {
-                document.onmousemove = (e) => { elm.style.left = e.pageX + 'px'; elm.style.top = e.pageY + 'px'; };
-                document.onmouseup = () => { document.onmousemove = null; };
+        function startAI() {
+            const status = document.getElementById('status');
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'ar-DZ';
+            recognition.start();
+            status.innerText = "أنا أسمعك يا عبده...";
+            
+            recognition.onresult = (e) => {
+                const cmd = e.results[0][0].transcript.toLowerCase();
+                status.innerText = "أنت قلت: " + cmd;
+                if(cmd.includes('افتح جوجل')) { window.open('https://google.com', '_blank'); }
             };
         }
-
-        setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
     </script>
 </body>
 </html>
