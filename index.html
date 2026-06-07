@@ -6,6 +6,7 @@
     <title>Abdo OS Pro</title>
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 
     <style>
         body { margin: 0; background: url('https://w.wallhaven.cc/full/y8/wallhaven-y8j5z9.jpg') no-repeat center center fixed; background-size: cover; color: #fff; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -45,6 +46,7 @@
     </div>
 
     <script>
+        // دالة الوقت
         function updateTime() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('ar-EG');
@@ -52,6 +54,7 @@
         }
         setInterval(updateTime, 1000);
 
+        // دالة القفل
         function checkPass() {
             if(document.getElementById('pass').value == "123") {
                 document.getElementById('lockScreen').style.display = 'none';
@@ -59,11 +62,13 @@
             } else { alert("كلمة المرور خطأ!"); }
         }
 
+        // دالة الحاسبة
         function openCalc() {
             let exp = prompt("أدخل العملية الحسابية (مثال: 5+5):");
             if(exp) alert("الناتج: " + eval(exp));
         }
 
+        // دالة المساعد الذكي
         function startAI() {
             const status = document.getElementById('status');
             const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -77,6 +82,11 @@
                 else if(cmd.includes('يوتيوب')) window.open('https://youtube.com');
                 else if(cmd.includes('فيسبوك')) window.open('https://facebook.com');
             };
+        }
+
+        // تسجيل الـ Service Worker لتمكين التثبيت
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed'));
         }
     </script>
 </body>
