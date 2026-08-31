@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdo Store - متجر الجزائر</title>
+    <title>Abdo Store - منصة التجار الجزائرية</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -13,6 +12,7 @@
             --text-color: #f8fafc;
             --accent-color: #10b981;
             --danger-color: #ef4444;
+            --warning-color: #d97706;
         }
 
         * {
@@ -42,29 +42,34 @@
         }
 
         .logo {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: bold;
             color: var(--primary-color);
         }
 
         .nav-btns {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            align-items: center;
         }
 
         .btn {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 8px 14px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .btn-admin {
-            background-color: #d97706;
+            background-color: var(--warning-color);
+        }
+
+        .btn-logout {
+            background-color: var(--danger-color);
         }
 
         .cart-badge {
@@ -125,6 +130,12 @@
 
         .product-title {
             font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .store-owner-tag {
+            font-size: 0.8rem;
+            color: #94a3b8;
             margin-bottom: 8px;
         }
 
@@ -155,7 +166,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(0, 0, 0, 0.75);
             z-index: 200;
             justify-content: center;
             align-items: center;
@@ -227,29 +238,38 @@
             cursor: pointer;
             font-size: 0.8rem;
         }
+
+        .switch-auth {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+        .switch-auth span {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">📦 Abdo Store - الجزائر</div>
-        <div class="nav-btns">
-            <button class="btn btn-admin" onclick="openAdmin()">⚙️ مساحة التاجر</button>
-            <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">0</span></button>
+        <div class="logo">📦 Abdo Store</div>
+        <div class="nav-btns" id="navBtnsContainer">
+            <!-- الزر ديناميكي حسب حالة التاجر -->
         </div>
     </header>
 
     <div class="container">
-        <h2 class="section-title">المنتجات المتوفرة</h2>
-        <div class="products-grid" id="productsGrid">
-            <!-- المنتجات تتولد هنا -->
-        </div>
+        <h2 class="section-title">جميع المنتجات المتوفرة</h2>
+        <div class="products-grid" id="productsGrid"></div>
     </div>
 
     <!-- نافذة سلة التسوق -->
     <div class="modal" id="cartModal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeCart()">&times;</span>
+            <span class="close-btn" onclick="closeModal('cartModal')">&times;</span>
             <h3>🛒 سلة التسوق</h3>
             <div id="cartItemsList" style="margin-top: 15px;"></div>
             <h4 style="margin-top: 15px; text-align: left;">المجموع: <span id="totalPrice" style="color: var(--accent-color);">0</span> دج</h4>
@@ -279,47 +299,87 @@
         </div>
     </div>
 
-    <!-- نافذة مساحة التاجر (لوحة التحكم) -->
+    <!-- نافذة تسجيل الدخول / إنشاء حساب للتاجر -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('authModal')">&times;</span>
+            <div id="loginSection">
+                <h3 id="authTitle">🔐 تسجيل دخول التاجر</h3>
+                <form onsubmit="handleLogin(event)" style="margin-top: 15px;">
+                    <div class="form-group">
+                        <label>اسم المستخدم (التاجر):</label>
+                        <input type="text" id="loginUser" required placeholder="اسمك التجاري">
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور:</label>
+                        <input type="password" id="loginPass" required placeholder="كلمة المرور">
+                    </div>
+                    <button type="submit" class="submit-btn">دخول إلى لوحة التحكم</button>
+                </form>
+                <div class="switch-auth" onclick="toggleAuthMode()">ليس لديك حساب؟ <span>أنشئ حساباً جديداً</span></div>
+            </div>
+
+            <div id="registerSection" style="display: none;">
+                <h3>📝 إنشاء حساب تاجر جديد</h3>
+                <form onsubmit="handleRegister(event)" style="margin-top: 15px;">
+                    <div class="form-group">
+                        <label>اسم المتجر / التاجر:</label>
+                        <input type="text" id="regUser" required placeholder="مثال: متجر الأنيق للملابس">
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الهاتف (لتلقي الطلب):</label>
+                        <input type="tel" id="regPhone" required placeholder="2136xxxxxxxx">
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور:</label>
+                        <input type="password" id="regPass" required placeholder="كلمة مرور قوية">
+                    </div>
+                    <button type="submit" class="submit-btn" style="background-color: var(--primary-color);">تسجيل حساب جديد</button>
+                </form>
+                <div class="switch-auth" onclick="toggleAuthMode()">لديك حساب بالفعل؟ <span>تسجيل الدخول</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- لوحة تحكم التاجر الخاصة -->
     <div class="modal" id="adminModal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeAdmin()">&times;</span>
-            <h3>⚙️ لوحة تحكم التاجر (إدارة المنتجات)</h3>
+            <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
+            <h3>⚙️ لوحة تحكم التاجر: <span id="currentStoreName" style="color: var(--accent-color);"></span></h3>
             
-            <form id="addProductForm" onsubmit="addNewProduct(event)" style="margin-top: 15px;">
+            <form onsubmit="addNewProduct(event)" style="margin-top: 15px;">
                 <div class="form-group">
                     <label>اسم المنتج:</label>
                     <input type="text" id="newTitle" required placeholder="مثال: قميص صيفي فاخر">
                 </div>
                 <div class="form-group">
                     <label>السعر (دج):</label>
-                    <input type="number" id="newPrice" required placeholder="مثال: 3000">
+                    <input type="number" id="newPrice" required placeholder="3000">
                 </div>
                 <div class="form-group">
                     <label>رابط الصورة (URL):</label>
-                    <input type="url" id="newImg" required placeholder="ضع رابط صورة المنتج هنا">
+                    <input type="url" id="newImg" required placeholder="رابط صورة المنتج">
                 </div>
-                <button type="submit" class="submit-btn" style="background-color: var(--primary-color);">➕ إضافة المنتج للمتجر</button>
+                <button type="submit" class="submit-btn" style="background-color: var(--primary-color);">➕ إضافة المنتج للمتجر العام</button>
             </form>
 
             <hr style="margin: 20px 0; border-color: #334155;">
-            <h4>قائمة منتجاتك الحالية:</h4>
-            <div id="adminProductsList" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
+            <h4>إدارة منتجاتك:</h4>
+            <div id="adminProductsList" style="margin-top: 10px; max-height: 180px; overflow-y: auto;"></div>
         </div>
     </div>
 
     <script>
-        // المنتجات الافتراضية أو المخزنة محلياً
-        let defaultProducts = [
-            { id: 1, title: "قميص شبابي عصري", price: 2800, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80" },
-            { id: 2, title: "سترة شتوية أنيقة", price: 5500, img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&auto=format&fit=crop&q=80" },
-            { id: 3, title: "سروال جينز ممتاز", price: 3400, img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&auto=format&fit=crop&q=80" },
-            { id: 4, title: "حذاء رياضي مريح", price: 4200, img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&auto=format&fit=crop&q=80" }
+        // قاعدة البيانات المحلية عبر localStorage
+        let vendors = JSON.parse(localStorage.getItem('abdo_vendors')) || []; // {username, password, phone, storeName}
+        let products = JSON.parse(localStorage.getItem('abdo_products')) || [
+            { id: 1, title: "قميص شبابي عصري", price: 2800, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80", owner: "الإدارة العامة", phone: "213600000000" },
+            { id: 2, title: "سترة شتوية أنيقة", price: 5500, img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&auto=format&fit=crop&q=80", owner: "الإدارة العامة", phone: "213600000000" }
         ];
+        
+        let currentVendor = JSON.parse(localStorage.getItem('abdo_current_vendor')) || null;
+        let cart = [];
 
-        // جلب المنتجات من التخزين أو استخدام الافتراضية
-        let products = JSON.parse(localStorage.getItem('abdo_store_products')) || defaultProducts;
-
-        // الولايات الجزائرية
         const wilayas = [
             "01 - أدرار", "02 - الشلف", "03 - الأغواط", "04 - أم البواقي", "05 - باتنة",
             "06 - بجاية", "07 - بسكرة", "08 - بشار", "09 - البليدة", "10 - البويرة",
@@ -335,22 +395,47 @@
             "56 - المغير", "57 - المنيعة", "58 - الدبداب"
         ];
 
-        let cart = [];
-        const myWhatsAppNumber = "213600000000"; // ⚠️ غيّر هذا الرقم برقم هاتفك الحقيقي
+        function initApp() {
+            renderNavbar();
+            renderProducts();
+            renderWilayas();
+            updateCartUI();
+        }
+
+        function renderNavbar() {
+            const container = document.getElementById('navBtnsContainer');
+            if (currentVendor) {
+                container.innerHTML = `
+                    <button class="btn btn-admin" onclick="openAdmin()">⚙️ لوحة تحكمي</button>
+                    <button class="btn btn-logout" onclick="logoutVendor()">خروج</button>
+                    <button class="btn" onclick="openModal('cartModal')">🛒 السلة <span class="cart-badge" id="cartCount">0</span></button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="btn btn-admin" onclick="openModal('authModal')">🔐 دخول التجار</button>
+                    <button class="btn" onclick="openModal('cartModal')">🛒 السلة <span class="cart-badge" id="cartCount">0</span></button>
+                `;
+            }
+        }
 
         function renderProducts() {
             const grid = document.getElementById('productsGrid');
+            if (products.length === 0) {
+                grid.innerHTML = "<p style='color: #94a3b8;'>لا توجد منتجات معروضة حالياً.</p>";
+                return;
+            }
             grid.innerHTML = products.map(p => `
                 <div class="product-card">
                     <img src="${p.img}" alt="${p.title}" class="product-img">
                     <div class="product-info">
                         <div class="product-title">${p.title}</div>
+                        <div class="store-owner-tag">المتجر: ${p.owner}</div>
                         <div class="product-price">${p.price} دج</div>
                         <button class="add-to-cart-btn" onclick="addToCart(${p.id})">إضافة إلى السلة 🛒</button>
                     </div>
                 </div>
             `).join('');
-            renderAdminProductsList();
+            if (currentVendor) renderAdminProducts();
         }
 
         function renderWilayas() {
@@ -362,6 +447,118 @@
                 opt.textContent = w;
                 select.appendChild(opt);
             });
+        }
+
+        // تسجيل حساب تاجر جديد
+        function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUser').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const password = document.getElementById('regPass').value;
+
+            if (vendors.some(v => v.username === username)) {
+                alert("اسم المستخدم مستخدم مسبقاً، اختر اسمًا آخر!");
+                return;
+            }
+
+            const newVendor = { username, phone, password };
+            vendors.push(newVendor);
+            localStorage.setItem('abdo_vendors', JSON.stringify(vendors));
+            
+            currentVendor = newVendor;
+            localStorage.setItem('abdo_current_vendor', JSON.stringify(currentVendor));
+
+            alert("تم إنشاء الحساب وتسجيل الدخول بنجاح!");
+            closeModal('authModal');
+            initApp();
+        }
+
+        // تسجيل دخول التاجر
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPass').value;
+
+            const vendor = vendors.find(v => v.username === username && v.password === password);
+            if (vendor) {
+                currentVendor = vendor;
+                localStorage.setItem('abdo_current_vendor', JSON.stringify(currentVendor));
+                alert("مرحباً بك مجدداً يا " + vendor.username);
+                closeModal('authModal');
+                initApp();
+            } else {
+                alert("خطأ في اسم المستخدم أو كلمة المرور!");
+            }
+        }
+
+        function logoutVendor() {
+            currentVendor = null;
+            localStorage.removeItem('abdo_current_vendor');
+            initApp();
+            alert("تم تسجيل الخروج بنجاح.");
+        }
+
+        function toggleAuthMode() {
+            const loginSec = document.getElementById('loginSection');
+            const regSec = document.getElementById('registerSection');
+            if (loginSec.style.display === 'none') {
+                loginSec.style.display = 'block';
+                regSec.style.display = 'none';
+            } else {
+                loginSec.style.display = 'none';
+                regSec.style.display = 'block';
+            }
+        }
+
+        // إضافة منتج خاص بالتاجر الحالي
+        function addNewProduct(e) {
+            e.preventDefault();
+            if (!currentVendor) return;
+
+            const title = document.getElementById('newTitle').value;
+            const price = Number(document.getElementById('newPrice').value);
+            const img = document.getElementById('newImg').value;
+
+            const newProd = {
+                id: Date.now(),
+                title,
+                price,
+                img,
+                owner: currentVendor.username,
+                phone: currentVendor.phone
+            };
+
+            products.push(newProd);
+            localStorage.setItem('abdo_products', JSON.stringify(products));
+
+            renderProducts();
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newPrice').value = '';
+            document.getElementById('newImg').value = '';
+            alert("تم إضافة المنتج بنجاح وظهوره في المتجر العام!");
+        }
+
+        function renderAdminProducts() {
+            const list = document.getElementById('adminProductsList');
+            const myProducts = products.filter(p => p.owner === currentVendor.username);
+            
+            if (myProducts.length === 0) {
+                list.innerHTML = "<p style='color: #94a3b8;'>ليس لديك منتجات مضافة بعد.</p>";
+                return;
+            }
+
+            list.innerHTML = myProducts.map(p => `
+                <div class="admin-item">
+                    <span>${p.title} (${p.price} دج)</span>
+                    <button class="delete-btn" onclick="deleteProduct(${p.id})">حذف</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteProduct(id) {
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem('abdo_products', JSON.stringify(products));
+            renderProducts();
         }
 
         function addToCart(id) {
@@ -378,8 +575,8 @@
             } else {
                 list.innerHTML = cart.map((item, index) => `
                     <div class="cart-item">
-                        <span>${item.title}</span>
-                        <span><b>${item.price} دج</b> <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; margin-right:10px;">❌</button></span>
+                        <span>${item.title} <small style="color:var(--accent-color);">(${item.owner})</small></span>
+                        <span><b>${item.price} دج</b> <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; margin-right:8px;">❌</button></span>
                     </div>
                 `).join('');
             }
@@ -392,55 +589,15 @@
             updateCartUI();
         }
 
-        function openCart() { document.getElementById('cartModal').style.display = 'flex'; }
-        function closeCart() { document.getElementById('cartModal').style.display = 'none'; }
-        
-        function openAdmin() { document.getElementById('adminModal').style.display = 'flex'; }
-        function closeAdmin() { document.getElementById('adminModal').style.display = 'none'; }
-
-        // إضافة منتج جديد من مساحة التاجر
-        function addNewProduct(e) {
-            e.preventDefault();
-            const title = document.getElementById('newTitle').value;
-            const price = Number(document.getElementById('newPrice').value);
-            const img = document.getElementById('newImg').value;
-
-            const newProd = {
-                id: Date.now(),
-                title: title,
-                price: price,
-                img: img
-            };
-
-            products.push(newProd);
-            localStorage.setItem('abdo_store_products', JSON.stringify(products));
-            
-            renderProducts();
-            document.getElementById('addProductForm').reset();
-            alert("تم إضافة المنتج بنجاح إلى المتجر!");
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function openAdmin() {
+            document.getElementById('currentStoreName').textContent = currentVendor.username;
+            openModal('adminModal');
+            renderAdminProducts();
         }
 
-        // عرض المنتجات داخل لوحة تحكم التاجر للحذف
-        function renderAdminProductsList() {
-            const list = document.getElementById('adminProductsList');
-            if (products.length === 0) {
-                list.innerHTML = "<p style='color: #94a3b8;'>لا توجد منتجات حالياً.</p>";
-                return;
-            }
-            list.innerHTML = products.map(p => `
-                <div class="admin-item">
-                    <span>${p.title} (${p.price} دج)</span>
-                    <button class="delete-btn" onclick="deleteProduct(${p.id})">حذف</button>
-                </div>
-            `).join('');
-        }
-
-        function deleteProduct(id) {
-            products = products.filter(p => p.id !== id);
-            localStorage.setItem('abdo_store_products', JSON.stringify(products));
-            renderProducts();
-        }
-
+        // إرسال الطلب عبر الواتساب (يرسل لرقم التاحر أو الإدارة)
         function sendOrder(e) {
             e.preventDefault();
             if (cart.length === 0) {
@@ -454,22 +611,23 @@
             const address = document.getElementById('custAddress').value;
             const total = cart.reduce((sum, item) => sum + item.price, 0);
 
-            let itemsText = cart.map(i => `- ${i.title} (${i.price} دج)`).join('%0A');
+            // سنأخذ رقم الهاتف من أول منتج في السلة أو الرقم الافتراضي
+            const targetPhone = cart[0].phone || "213600000000";
 
-            let message = `🛒 *طلب جديد من متجر Abdo OS Pro*%0A%0A` +
-                          `👤 *الاسم:* الاسم واللقب... *${name}*%0A` +
+            let itemsText = cart.map(i => `- ${i.title} (${i.price} دج) [بواسطة: ${i.owner}]`).join('%0A');
+
+            let message = `🛒 *طلب جديد عبر متجرنا*%0A%0A` +
+                          `👤 *الاسم:* ${name}%0A` +
                           `📞 *الهاتف:* ${phone}%0A` +
                           `📍 *الولاية:* ${wilaya}%0A` +
-                          `🏡 *العنوان/البلدية:* ${address}%0A%0A` +
-                          `📦 *المنتجات المطلوبة:*%0A${itemsText}%0A%0A` +
+                          `🏡 *العنوان:* ${address}%0A%0A` +
+                          `📦 *المنتجات:*%0A${itemsText}%0A%0A` +
                           `💰 *الإجمالي:* ${total} دج`;
 
-            window.open(`https://wa.me/${myWhatsAppNumber}?text=${message}`, '_blank');
+            window.open(`https://wa.me/${targetPhone}?text=${message}`, '_blank');
         }
 
-        renderProducts();
-        renderWilayas();
-        updateCartUI();
+        initApp();
     </script>
 </body>
 </html>
