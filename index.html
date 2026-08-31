@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdo Store - متجر الجزائر</title>
+    <title>Abdo OS - منصة التجارة الإلكترونية بالجزائر</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -12,6 +13,7 @@
             --text-color: #f8fafc;
             --accent-color: #10b981;
             --danger-color: #ef4444;
+            --warning-color: #d97706;
         }
 
         * {
@@ -48,6 +50,7 @@
         .nav-btns {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
 
         .btn {
@@ -61,9 +64,8 @@
             font-size: 0.9rem;
         }
 
-        .btn-admin {
-            background-color: #d97706;
-        }
+        .btn-admin { background-color: var(--warning-color); }
+        .btn-auth { background-color: #475569; }
 
         .cart-badge {
             background-color: var(--danger-color);
@@ -129,6 +131,12 @@
             font-weight: bold;
             font-size: 1.2rem;
             margin-bottom: 12px;
+        }
+
+        .vendor-tag {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
         }
 
         .add-to-cart-btn {
@@ -222,14 +230,26 @@
             cursor: pointer;
             font-size: 0.8rem;
         }
+
+        .role-selector {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .role-selector label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
     </style>
 </head>
 <body>
 
     <header>
         <div class="logo">📦 Abdo Store - الجزائر</div>
-        <div class="nav-btns">
-            <button class="btn btn-admin" onclick="openAdmin()">⚙️ مساحة التاجر</button>
+        <div class="nav-btns" id="navButtons">
+            <button class="btn btn-auth" onclick="openAuthModal()">👤 تسجيل الدخول / حساب جديد</button>
             <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">0</span></button>
         </div>
     </header>
@@ -237,6 +257,32 @@
     <div class="container">
         <h2 class="section-title">المنتجات المتوفرة</h2>
         <div class="products-grid" id="productsGrid"></div>
+    </div>
+
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeAuthModal()">&times;</span>
+            <h3 id="authTitle">🔐 تسجيل الدخول أو حساب جديد</h3>
+            
+            <form id="authForm" onsubmit="handleAuth(event)" style="margin-top: 15px;">
+                <div class="form-group" id="roleGroup">
+                    <label>اختر نوع الحساب:</label>
+                    <div class="role-selector">
+                        <label><input type="radio" name="userRole" value="customer" checked> زبون 🛒</label>
+                        <label><input type="radio" name="userRole" value="vendor"> تاجر ⚙️</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>البريد الإلكتروني:</label>
+                    <input type="email" id="authEmail" required placeholder="name@example.com">
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور:</label>
+                    <input type="password" id="authPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="submit-btn">🚀 دخول / تسجيل</button>
+            </form>
+        </div>
     </div>
 
     <div class="modal" id="cartModal">
@@ -274,7 +320,9 @@
     <div class="modal" id="adminModal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeAdmin()">&times;</span>
-            <h3>⚙️ لوحة تحكم التاجر</h3>
+            <h3>⚙️ لوحة تحكم التاجر المستقلة</h3>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 5px;" id="vendorEmailDisplay"></p>
+            
             <form id="addProductForm" onsubmit="addNewProduct(event)" style="margin-top: 15px;">
                 <div class="form-group">
                     <label>اسم المنتج:</label>
@@ -288,23 +336,27 @@
                     <label>رابط الصورة (URL):</label>
                     <input type="url" id="newImg" required placeholder="ضع رابط صورة المنتج هنا">
                 </div>
-                <button type="submit" class="submit-btn" style="background-color: var(--primary-color);">➕ إضافة المنتج للمتجر</button>
+                <button type="submit" class="submit-btn" style="background-color: var(--primary-color);">➕ إضافة المنتج للمتجر العام</button>
             </form>
             <hr style="margin: 20px 0; border-color: #334155;">
-            <h4>قائمة منتجاتك الحالية:</h4>
+            <h4>منتجاتك الخاصة:</h4>
             <div id="adminProductsList" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
         </div>
     </div>
 
     <script>
-        let defaultProducts = [
-            { id: 1, title: "قميص شبابي عصري", price: 2800, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80" },
-            { id: 2, title: "سترة شتوية أنيقة", price: 5500, img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&auto=format&fit=crop&q=80" },
-            { id: 3, title: "سروال جينز ممتاز", price: 3400, img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&auto=format&fit=crop&q=80" },
-            { id: 4, title: "حذاء رياضي مريح", price: 4200, img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&auto=format&fit=crop&q=80" }
-        ];
+        // إعدادات الاتصال بـ Supabase (رابط مشروعك الخاص بك)
+        const SUPABASE_URL = 'https://lvthnzfubbrhyfnwqaxs.supabase.co';
+        const SUPABASE_KEY = 'أدخل_مفتاحك_العام_هنا'; // ضع مفتاح الـ anon الخاص بك هنا
+        
+        // تهيئة عميل Supabase
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let products = JSON.parse(localStorage.getItem('abdo_store_products')) || defaultProducts;
+        let products = [];
+        let cart = [];
+        let currentUser = null;
+        let userRole = 'customer'; // الافتراضي زبون
+        const myWhatsAppNumber = "213600000000"; // ⚠️ رقم الواتساب الخاص بك
 
         const wilayas = [
             "01 - أدرار", "02 - الشلف", "03 - الأغواط", "04 - أم البواقي", "05 - باتنة",
@@ -321,8 +373,20 @@
             "56 - المغير", "57 - المنيعة", "58 - الدبداب"
         ];
 
-        let cart = [];
-        const myWhatsAppNumber = "213600000000"; // ⚠️ غيّر هذا الرقم برقم هاتفك
+        // جلب المنتجات من قاعدة البيانات الحقيقية
+        async function fetchProducts() {
+            const { data, error } = await supabaseClient.from('products').select('*');
+            if (error) {
+                console.log("خطأ في جلب المنتجات:", error.message);
+                // منتجات افتراضية مؤقتة في حال لم تقم بإنشاء الجدول بعد في قاعدة البيانات
+                products = [
+                    { id: 1, title: "قميص شبابي عصري", price: 2800, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80", vendor: "متاجر الجزائر" }
+                ];
+            } else {
+                products = data || [];
+            }
+            renderProducts();
+        }
 
         function renderProducts() {
             const grid = document.getElementById('productsGrid');
@@ -330,13 +394,16 @@
                 <div class="product-card">
                     <img src="${p.img}" alt="${p.title}" class="product-img">
                     <div class="product-info">
+                        <div class="vendor-tag">بواسطة: ${p.vendor || 'متجر معتمد'}</div>
                         <div class="product-title">${p.title}</div>
                         <div class="product-price">${p.price} دج</div>
-                        <button class="add-to-cart-btn" onclick="addToCart(${p.id})">إضافة إلى السلة 🛒</button>
+                        <button class="add-to-cart-btn" onclick="addToCart('${p.id}')">إضافة إلى السلة 🛒</button>
                     </div>
                 </div>
             `).join('');
-            renderAdminProductsList();
+            if (currentUser && userRole === 'vendor') {
+                renderAdminProductsList();
+            }
         }
 
         function renderWilayas() {
@@ -350,15 +417,127 @@
             });
         }
 
+        // التعامل مع تسجيل الدخول والتسجيل عبر Supabase Auth
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const selectedRole = document.querySelector('input[name="userRole"]:checked').value;
+
+            // محاولة تسجيل الدخول أولاً
+            let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            
+            if (error) {
+                // إن لم يكن الحساب موجوداً، نقوم بإنشائه تلقائياً (Signup)
+                let signupRes = await supabaseClient.auth.signUp({ 
+                    email, 
+                    password,
+                    options: { data: { role: selectedRole } }
+                });
+                if (signupRes.error) {
+                    alert("خطأ: " + signupRes.error.message);
+                    return;
+                }
+                alert("تم إنشاء الحساب بنجاح وتم تسجيل دخولك!");
+                currentUser = signupRes.data.user;
+            } else {
+                alert("مرحباً بك مجدداً، تم تسجيل الدخول بنجاح!");
+                currentUser = data.user;
+            }
+
+            userRole = selectedRole;
+            updateNavUI();
+            closeAuthModal();
+        }
+
+        // تحديث أزرار القائمة بعد تسجيل الدخول
+        function updateNavUI() {
+            const nav = document.getElementById('navButtons');
+            if (currentUser) {
+                if (userRole === 'vendor') {
+                    nav.innerHTML = `
+                        <button class="btn btn-admin" onclick="openAdmin()">⚙️ لوحة التاجر</button>
+                        <button class="btn btn-auth" onclick="logout()">خروج 🚪</button>
+                        <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">${cart.length}</span></button>
+                    `;
+                } else {
+                    nav.innerHTML = `
+                        <span style="font-size: 0.85rem; color: #10b981;">أهلاً، زبوننا الكريم</span>
+                        <button class="btn btn-auth" onclick="logout()">خروج 🚪</button>
+                        <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">${cart.length}</span></button>
+                    `;
+                }
+            }
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            currentUser = null;
+            userRole = 'customer';
+            location.reload();
+        }
+
+        // إضافة منتج جديد خاص بالتاجر المسجل في قاعدة البيانات
+        async function addNewProduct(e) {
+            e.preventDefault();
+            if (!currentUser || userRole !== 'vendor') return;
+
+            const title = document.getElementById('newTitle').value;
+            const price = Number(document.getElementById('newPrice').value);
+            const img = document.getElementById('newImg').value;
+            const vendorEmail = currentUser.email;
+
+            const { data, error } = await supabaseClient
+                .from('products')
+                .insert([{ title, price, img, vendor: vendorEmail }]);
+
+            if (error) {
+                alert("فشل في إضافة المنتج: " + error.message);
+            } else {
+                alert("تم إضافة المنتج بنجاح للقاعدة السحابية!");
+                document.getElementById('addProductForm').reset();
+                fetchProducts();
+            }
+        }
+
+        function renderAdminProductsList() {
+            const list = document.getElementById('adminProductsList');
+            const myProducts = products.filter(p => p.vendor === currentUser.email);
+            
+            if (myProducts.length === 0) {
+                list.innerHTML = "<p style='color: #94a3b8;'>ليس لديك منتجات حالياً.</p>";
+                return;
+            }
+            list.innerHTML = myProducts.map(p => `
+                <div class="admin-item">
+                    <span>${p.title} (${p.price} دج)</span>
+                    <button class="delete-btn" onclick="deleteProduct('${p.id}')">حذف</button>
+                </div>
+            `).join('');
+        }
+
+        async function deleteProduct(id) {
+            const { error } = await supabaseClient.from('products').delete().eq('id', id);
+            if (error) {
+                alert("خطأ في الحذف: " + error.message);
+            } else {
+                fetchProducts();
+            }
+        }
+
         function addToCart(id) {
-            const product = products.find(p => p.id === id);
+            const product = products.find(p => String(p.id) === String(id));
             cart.push(product);
             updateCartUI();
         }
 
         function updateCartUI() {
-            document.getElementById('cartCount').textContent = cart.length;
+            const badge = document.getElementById('cartCount');
+            if(badge) badge.textContent = cart.length;
+            
             const list = document.getElementById('cartItemsList');
+            if (!list) return;
+
             if (cart.length === 0) {
                 list.innerHTML = "<p style='color: #94a3b8;'>السلة فارغة حالياً.</p>";
             } else {
@@ -370,7 +549,8 @@
                 `).join('');
             }
             const total = cart.reduce((sum, item) => sum + item.price, 0);
-            document.getElementById('totalPrice').textContent = total;
+            const totalElem = document.getElementById('totalPrice');
+            if(totalElem) totalElem.textContent = total;
         }
 
         function removeFromCart(index) {
@@ -378,46 +558,18 @@
             updateCartUI();
         }
 
+        function openAuthModal() { document.getElementById('authModal').style.display = 'flex'; }
+        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
+        
         function openCart() { document.getElementById('cartModal').style.display = 'flex'; }
         function closeCart() { document.getElementById('cartModal').style.display = 'none'; }
         
-        function openAdmin() { document.getElementById('adminModal').style.display = 'flex'; }
+        function openAdmin() { 
+            document.getElementById('adminModal').style.display = 'flex'; 
+            document.getElementById('vendorEmailDisplay').textContent = "التاجر المسجل: " + currentUser.email;
+            renderAdminProductsList();
+        }
         function closeAdmin() { document.getElementById('adminModal').style.display = 'none'; }
-
-        function addNewProduct(e) {
-            e.preventDefault();
-            const title = document.getElementById('newTitle').value;
-            const price = Number(document.getElementById('newPrice').value);
-            const img = document.getElementById('newImg').value;
-
-            const newProd = { id: Date.now(), title, price, img };
-            products.push(newProd);
-            localStorage.setItem('abdo_store_products', JSON.stringify(products));
-            
-            renderProducts();
-            document.getElementById('addProductForm').reset();
-            alert("تم إضافة المنتج بنجاح!");
-        }
-
-        function renderAdminProductsList() {
-            const list = document.getElementById('adminProductsList');
-            if (products.length === 0) {
-                list.innerHTML = "<p style='color: #94a3b8;'>لا توجد منتجات.</p>";
-                return;
-            }
-            list.innerHTML = products.map(p => `
-                <div class="admin-item">
-                    <span>${p.title} (${p.price} دج)</span>
-                    <button class="delete-btn" onclick="deleteProduct(${p.id})">حذف</button>
-                </div>
-            `).join('');
-        }
-
-        function deleteProduct(id) {
-            products = products.filter(p => p.id !== id);
-            localStorage.setItem('abdo_store_products', JSON.stringify(products));
-            renderProducts();
-        }
 
         function sendOrder(e) {
             e.preventDefault();
@@ -438,9 +590,9 @@
             window.open(`https://wa.me/${myWhatsAppNumber}?text=${message}`, '_blank');
         }
 
-        renderProducts();
+        // تشغيل الوظائف عند تحميل الصفحة
         renderWilayas();
-        updateCartUI();
+        fetchProducts();
     </script>
 </body>
 </html>
