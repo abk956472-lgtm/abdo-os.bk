@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdo OS - متجر الجزائر</title>
+    <title>Abdo Store - متجر الجزائر</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -11,6 +12,7 @@
             --card-bg: #1e293b;
             --text-color: #f8fafc;
             --accent-color: #10b981;
+            --danger-color: #ef4444;
         }
 
         * {
@@ -40,29 +42,38 @@
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: var(--primary-color);
         }
 
-        .cart-btn {
+        .nav-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 18px;
+            padding: 8px 15px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
-            position: relative;
+            font-size: 0.9rem;
+        }
+
+        .btn-admin {
+            background-color: #d97706;
         }
 
         .cart-badge {
-            background-color: #ef4444;
+            background-color: var(--danger-color);
             color: white;
             border-radius: 50%;
-            padding: 2px 7px;
-            font-size: 0.8rem;
-            margin-right: 5px;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            margin-right: 4px;
         }
 
         /* Main Container */
@@ -136,7 +147,7 @@
             font-weight: bold;
         }
 
-        /* Cart Modal */
+        /* Modals */
         .modal {
             display: none;
             position: fixed;
@@ -167,7 +178,7 @@
             color: #94a3b8;
         }
 
-        .cart-item {
+        .cart-item, .admin-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -206,38 +217,43 @@
             margin-top: 20px;
             cursor: pointer;
         }
+
+        .delete-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
 
     <header>
         <div class="logo">📦 Abdo Store - الجزائر</div>
-        <button class="cart-btn" onclick="openCart()">
-            🛒 السلة <span class="cart-badge" id="cartCount">0</span>
-        </button>
+        <div class="nav-btns">
+            <button class="btn btn-admin" onclick="openAdmin()">⚙️ مساحة التاجر</button>
+            <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">0</span></button>
+        </div>
     </header>
 
     <div class="container">
         <h2 class="section-title">المنتجات المتوفرة</h2>
         <div class="products-grid" id="productsGrid">
-            <!-- المنتجات تتولد هنا عبر JavaScript -->
+            <!-- المنتجات تتولد هنا -->
         </div>
     </div>
 
-    <!-- نافذة السلة والشراء -->
+    <!-- نافذة سلة التسوق -->
     <div class="modal" id="cartModal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeCart()">&times;</span>
             <h3>🛒 سلة التسوق</h3>
-            
-            <div id="cartItemsList" style="margin-top: 15px;">
-                <!-- عناصر السلة -->
-            </div>
-
+            <div id="cartItemsList" style="margin-top: 15px;"></div>
             <h4 style="margin-top: 15px; text-align: left;">المجموع: <span id="totalPrice" style="color: var(--accent-color);">0</span> دج</h4>
-
             <hr style="margin: 20px 0; border-color: #334155;">
-
             <h3>📋 معلومات التوصيل (الدفع عند الاستلام)</h3>
             <form id="orderForm" onsubmit="sendOrder(event)">
                 <div class="form-group">
@@ -252,7 +268,6 @@
                     <label>الولاية:</label>
                     <select id="custWilaya" required>
                         <option value="">اختر الولاية...</option>
-                        <!-- الولايات تتولد تلقائياً -->
                     </select>
                 </div>
                 <div class="form-group">
@@ -264,16 +279,47 @@
         </div>
     </div>
 
+    <!-- نافذة مساحة التاجر (لوحة التحكم) -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeAdmin()">&times;</span>
+            <h3>⚙️ لوحة تحكم التاجر (إدارة المنتجات)</h3>
+            
+            <form id="addProductForm" onsubmit="addNewProduct(event)" style="margin-top: 15px;">
+                <div class="form-group">
+                    <label>اسم المنتج:</label>
+                    <input type="text" id="newTitle" required placeholder="مثال: قميص صيفي فاخر">
+                </div>
+                <div class="form-group">
+                    <label>السعر (دج):</label>
+                    <input type="number" id="newPrice" required placeholder="مثال: 3000">
+                </div>
+                <div class="form-group">
+                    <label>رابط الصورة (URL):</label>
+                    <input type="url" id="newImg" required placeholder="ضع رابط صورة المنتج هنا">
+                </div>
+                <button type="submit" class="submit-btn" style="background-color: var(--primary-color);">➕ إضافة المنتج للمتجر</button>
+            </form>
+
+            <hr style="margin: 20px 0; border-color: #334155;">
+            <h4>قائمة منتجاتك الحالية:</h4>
+            <div id="adminProductsList" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
     <script>
-        // 1. قائمة المنتجات (يمكنك تعديلها وتغيير الصور والأسعار)
-        const products = [
-            { id: 1, title: "قميص شبابي عصري (Trendy Shirt)", price: 2800, img: "https://via.placeholder.com/300x200?text=Shirt" },
-            { id: 2, title: "سترة شتوية أنيقة (Jacket)", price: 5500, img: "https://via.placeholder.com/300x200?text=Jacket" },
-            { id: 3, title: "سروال جينز ممتاز (Jeans)", price: 3400, img: "https://via.placeholder.com/300x200?text=Jeans" },
-            { id: 4, title: "حذاء رياضي مريح (Sneakers)", price: 4200, img: "https://via.placeholder.com/300x200?text=Shoes" }
+        // المنتجات الافتراضية أو المخزنة محلياً
+        let defaultProducts = [
+            { id: 1, title: "قميص شبابي عصري", price: 2800, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80" },
+            { id: 2, title: "سترة شتوية أنيقة", price: 5500, img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&auto=format&fit=crop&q=80" },
+            { id: 3, title: "سروال جينز ممتاز", price: 3400, img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&auto=format&fit=crop&q=80" },
+            { id: 4, title: "حذاء رياضي مريح", price: 4200, img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&auto=format&fit=crop&q=80" }
         ];
 
-        // 2. قائمة الولايات الجزائرية (58 ولاية)
+        // جلب المنتجات من التخزين أو استخدام الافتراضية
+        let products = JSON.parse(localStorage.getItem('abdo_store_products')) || defaultProducts;
+
+        // الولايات الجزائرية
         const wilayas = [
             "01 - أدرار", "02 - الشلف", "03 - الأغواط", "04 - أم البواقي", "05 - باتنة",
             "06 - بجاية", "07 - بسكرة", "08 - بشار", "09 - البليدة", "10 - البويرة",
@@ -290,9 +336,8 @@
         ];
 
         let cart = [];
-        const myWhatsAppNumber = "213600000000"; // ⚠️ غيّر هذا الرقم إلى رقم الواتساب الخاص بك (مع رمز الجزائر 213)
+        const myWhatsAppNumber = "213600000000"; // ⚠️ غيّر هذا الرقم برقم هاتفك الحقيقي
 
-        // عرض المنتجات في الصفحة
         function renderProducts() {
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = products.map(p => `
@@ -305,11 +350,12 @@
                     </div>
                 </div>
             `).join('');
+            renderAdminProductsList();
         }
 
-        // إملاء قائمة الولايات
         function renderWilayas() {
             const select = document.getElementById('custWilaya');
+            select.innerHTML = '<option value="">اختر الولاية...</option>';
             wilayas.forEach(w => {
                 const opt = document.createElement('option');
                 opt.value = w;
@@ -318,17 +364,14 @@
             });
         }
 
-        // إضافة منتج للسلة
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             cart.push(product);
             updateCartUI();
         }
 
-        // تحديث أرقام ومحتوى السلة
         function updateCartUI() {
             document.getElementById('cartCount').textContent = cart.length;
-            
             const list = document.getElementById('cartItemsList');
             if (cart.length === 0) {
                 list.innerHTML = "<p style='color: #94a3b8;'>السلة فارغة حالياً.</p>";
@@ -340,7 +383,6 @@
                     </div>
                 `).join('');
             }
-
             const total = cart.reduce((sum, item) => sum + item.price, 0);
             document.getElementById('totalPrice').textContent = total;
         }
@@ -350,15 +392,55 @@
             updateCartUI();
         }
 
-        function openCart() {
-            document.getElementById('cartModal').style.display = 'flex';
+        function openCart() { document.getElementById('cartModal').style.display = 'flex'; }
+        function closeCart() { document.getElementById('cartModal').style.display = 'none'; }
+        
+        function openAdmin() { document.getElementById('adminModal').style.display = 'flex'; }
+        function closeAdmin() { document.getElementById('adminModal').style.display = 'none'; }
+
+        // إضافة منتج جديد من مساحة التاجر
+        function addNewProduct(e) {
+            e.preventDefault();
+            const title = document.getElementById('newTitle').value;
+            const price = Number(document.getElementById('newPrice').value);
+            const img = document.getElementById('newImg').value;
+
+            const newProd = {
+                id: Date.now(),
+                title: title,
+                price: price,
+                img: img
+            };
+
+            products.push(newProd);
+            localStorage.setItem('abdo_store_products', JSON.stringify(products));
+            
+            renderProducts();
+            document.getElementById('addProductForm').reset();
+            alert("تم إضافة المنتج بنجاح إلى المتجر!");
         }
 
-        function closeCart() {
-            document.getElementById('cartModal').style.display = 'none';
+        // عرض المنتجات داخل لوحة تحكم التاجر للحذف
+        function renderAdminProductsList() {
+            const list = document.getElementById('adminProductsList');
+            if (products.length === 0) {
+                list.innerHTML = "<p style='color: #94a3b8;'>لا توجد منتجات حالياً.</p>";
+                return;
+            }
+            list.innerHTML = products.map(p => `
+                <div class="admin-item">
+                    <span>${p.title} (${p.price} دج)</span>
+                    <button class="delete-btn" onclick="deleteProduct(${p.id})">حذف</button>
+                </div>
+            `).join('');
         }
 
-        // إرسال الطلب عبر الواتساب
+        function deleteProduct(id) {
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem('abdo_store_products', JSON.stringify(products));
+            renderProducts();
+        }
+
         function sendOrder(e) {
             e.preventDefault();
             if (cart.length === 0) {
@@ -375,7 +457,7 @@
             let itemsText = cart.map(i => `- ${i.title} (${i.price} دج)`).join('%0A');
 
             let message = `🛒 *طلب جديد من متجر Abdo OS Pro*%0A%0A` +
-                          `👤 *الاسم:* ${name}%0A` +
+                          `👤 *الاسم:* الاسم واللقب... *${name}*%0A` +
                           `📞 *الهاتف:* ${phone}%0A` +
                           `📍 *الولاية:* ${wilaya}%0A` +
                           `🏡 *العنوان/البلدية:* ${address}%0A%0A` +
@@ -385,7 +467,6 @@
             window.open(`https://wa.me/${myWhatsAppNumber}?text=${message}`, '_blank');
         }
 
-        // تشغيل الوظائف المبدئية عند التحميل
         renderProducts();
         renderWilayas();
         updateCartUI();
