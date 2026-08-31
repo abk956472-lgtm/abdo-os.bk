@@ -3,91 +3,392 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdo OS Pro</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-
+    <title>Abdo OS - متجر الجزائر</title>
     <style>
-        body { margin: 0; background: url('https://w.wallhaven.cc/full/y8/wallhaven-y8j5z9.jpg') no-repeat center center fixed; background-size: cover; color: #fff; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
-        .clock { font-size: 3em; margin-bottom: 10px; text-shadow: 2px 2px 10px #000; }
-        .drawer { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; background: rgba(0,0,0,0.6); border-radius: 20px; backdrop-filter: blur(10px); }
-        .app-item { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.2); }
-        .app-item:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
-        input[type="password"] { padding: 12px; border-radius: 5px; border: none; margin: 10px; width: 200px; text-align: center; }
-        button { padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; background: #00d4ff; font-weight: bold; }
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 50px;
+        }
+
+        /* Navbar */
+        header {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .cart-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .cart-badge {
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 7px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .section-title {
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-right: 4px solid var(--primary-color);
+            padding-right: 10px;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #334155;
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .product-price {
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        /* Cart Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            float: left;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .form-group {
+            margin-top: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: white;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 20px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <div id="lockScreen">
-        <h2>🔒 قفل النظام</h2>
-        <input type="password" id="pass" placeholder="كلمة المرور: 123">
-        <button onclick="checkPass()">دخول</button>
+    <header>
+        <div class="logo">📦 Abdo Store - الجزائر</div>
+        <button class="cart-btn" onclick="openCart()">
+            🛒 السلة <span class="cart-badge" id="cartCount">0</span>
+        </button>
+    </header>
+
+    <div class="container">
+        <h2 class="section-title">المنتجات المتوفرة</h2>
+        <div class="products-grid" id="productsGrid">
+            <!-- المنتجات تتولد هنا عبر JavaScript -->
+        </div>
     </div>
 
-    <div id="main" style="display:none; text-align:center;">
-        <div class="clock" id="clock">00:00</div>
-        <div id="date">--/--/----</div>
-        
-        <button onclick="startAI()" style="margin:20px; background:#ff0055; color:white;">🎙️ المساعد الذكي</button>
-        <p id="status">اضغط للتحدث...</p>
+    <!-- نافذة السلة والشراء -->
+    <div class="modal" id="cartModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeCart()">&times;</span>
+            <h3>🛒 سلة التسوق</h3>
+            
+            <div id="cartItemsList" style="margin-top: 15px;">
+                <!-- عناصر السلة -->
+            </div>
 
-        <div class="drawer">
-            <div class="app-item" onclick="window.open('https://google.com')">🌐 جوجل</div>
-            <div class="app-item" onclick="window.open('https://youtube.com')">▶️ يوتيوب</div>
-            <div class="app-item" onclick="window.open('https://facebook.com')">👤 فيسبوك</div>
-            <div class="app-item" onclick="window.open('https://chatgpt.com')">🤖 ChatGPT</div>
-            <div class="app-item" onclick="openCalc()">🧮 آلة حاسبة</div>
-            <div class="app-item" onclick="alert('ملفاتي فارغة')">📁 ملفاتي</div>
-            <div class="app-item" onclick="window.location.reload()">🔄 تحديث</div>
+            <h4 style="margin-top: 15px; text-align: left;">المجموع: <span id="totalPrice" style="color: var(--accent-color);">0</span> دج</h4>
+
+            <hr style="margin: 20px 0; border-color: #334155;">
+
+            <h3>📋 معلومات التوصيل (الدفع عند الاستلام)</h3>
+            <form id="orderForm" onsubmit="sendOrder(event)">
+                <div class="form-group">
+                    <label>الاسم الكامل:</label>
+                    <input type="text" id="custName" required placeholder="مثال: محمد أمين">
+                </div>
+                <div class="form-group">
+                    <label>رقم الهاتف:</label>
+                    <input type="tel" id="custPhone" required placeholder="06XXXXXXXX">
+                </div>
+                <div class="form-group">
+                    <label>الولاية:</label>
+                    <select id="custWilaya" required>
+                        <option value="">اختر الولاية...</option>
+                        <!-- الولايات تتولد تلقائياً -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>البلدية / العنوان:</label>
+                    <input type="text" id="custAddress" required placeholder="اسم البلدية أو الحي">
+                </div>
+                <button type="submit" class="submit-btn">📲 تأكيد الطلب عبر واتساب</button>
+            </form>
         </div>
     </div>
 
     <script>
-        // دالة الوقت
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('ar-EG');
-            document.getElementById('date').innerText = now.toLocaleDateString('ar-EG');
-        }
-        setInterval(updateTime, 1000);
+        // 1. قائمة المنتجات (يمكنك تعديلها وتغيير الصور والأسعار)
+        const products = [
+            { id: 1, title: "قميص شبابي عصري (Trendy Shirt)", price: 2800, img: "https://via.placeholder.com/300x200?text=Shirt" },
+            { id: 2, title: "سترة شتوية أنيقة (Jacket)", price: 5500, img: "https://via.placeholder.com/300x200?text=Jacket" },
+            { id: 3, title: "سروال جينز ممتاز (Jeans)", price: 3400, img: "https://via.placeholder.com/300x200?text=Jeans" },
+            { id: 4, title: "حذاء رياضي مريح (Sneakers)", price: 4200, img: "https://via.placeholder.com/300x200?text=Shoes" }
+        ];
 
-        // دالة القفل
-        function checkPass() {
-            if(document.getElementById('pass').value == "123") {
-                document.getElementById('lockScreen').style.display = 'none';
-                document.getElementById('main').style.display = 'block';
-            } else { alert("كلمة المرور خطأ!"); }
+        // 2. قائمة الولايات الجزائرية (58 ولاية)
+        const wilayas = [
+            "01 - أدرار", "02 - الشلف", "03 - الأغواط", "04 - أم البواقي", "05 - باتنة",
+            "06 - بجاية", "07 - بسكرة", "08 - بشار", "09 - البليدة", "10 - البويرة",
+            "11 - تمنراست", "12 - تبسة", "13 - تلمسان", "14 - تيارت", "15 - تيزي وزو",
+            "16 - الجزائر", "17 - الجلفة", "18 - جيجل", "19 - سطيف", "20 - سعيدة",
+            "21 - سكيكدة", "22 - سيدي بلعباس", "23 - عنابة", "24 - قالمة", "25 - قسنطينة",
+            "26 - المدية", "27 - مستغانم", "28 - المسيلة", "29 - معسكر", "30 - ورقلة",
+            "31 - وهران", "32 - البيض", "33 - إليزي", "34 - برج بوعريريج", "35 - بومرداس",
+            "36 - الطارف", "37 - تندوف", "38 - تسمسيلت", "39 - الوادي", "40 - خنشلة",
+            "41 - سوق أهراس", "42 - تيبازة", "43 - ميلة", "44 - عين الدفلى", "45 - النعامة",
+            "46 - عين تموشنت", "47 - غرداية", "48 - غليزان", "49 - التيميمون", "50 - برج باجي مختار",
+            "51 - أولاد جلال", "52 - بني عباس", "53 - إن صالح", "54 - إن قزام", "55 - تقرت",
+            "56 - المغير", "57 - المنيعة", "58 - الدبداب"
+        ];
+
+        let cart = [];
+        const myWhatsAppNumber = "213600000000"; // ⚠️ غيّر هذا الرقم إلى رقم الواتساب الخاص بك (مع رمز الجزائر 213)
+
+        // عرض المنتجات في الصفحة
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = products.map(p => `
+                <div class="product-card">
+                    <img src="${p.img}" alt="${p.title}" class="product-img">
+                    <div class="product-info">
+                        <div class="product-title">${p.title}</div>
+                        <div class="product-price">${p.price} دج</div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${p.id})">إضافة إلى السلة 🛒</button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // دالة الحاسبة
-        function openCalc() {
-            let exp = prompt("أدخل العملية الحسابية (مثال: 5+5):");
-            if(exp) alert("الناتج: " + eval(exp));
+        // إملاء قائمة الولايات
+        function renderWilayas() {
+            const select = document.getElementById('custWilaya');
+            wilayas.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = w;
+                opt.textContent = w;
+                select.appendChild(opt);
+            });
         }
 
-        // دالة المساعد الذكي
-        function startAI() {
-            const status = document.getElementById('status');
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'ar-DZ';
-            recognition.start();
-            status.innerText = "أسمعك يا عبده...";
-            recognition.onresult = (e) => {
-                const cmd = e.results[0][0].transcript.toLowerCase();
-                status.innerText = "أنت قلت: " + cmd;
-                if(cmd.includes('جوجل')) window.open('https://google.com');
-                else if(cmd.includes('يوتيوب')) window.open('https://youtube.com');
-                else if(cmd.includes('فيسبوك')) window.open('https://facebook.com');
-            };
+        // إضافة منتج للسلة
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            updateCartUI();
         }
 
-        // تسجيل الـ Service Worker لتمكين التثبيت
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed'));
+        // تحديث أرقام ومحتوى السلة
+        function updateCartUI() {
+            document.getElementById('cartCount').textContent = cart.length;
+            
+            const list = document.getElementById('cartItemsList');
+            if (cart.length === 0) {
+                list.innerHTML = "<p style='color: #94a3b8;'>السلة فارغة حالياً.</p>";
+            } else {
+                list.innerHTML = cart.map((item, index) => `
+                    <div class="cart-item">
+                        <span>${item.title}</span>
+                        <span><b>${item.price} دج</b> <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; margin-right:10px;">❌</button></span>
+                    </div>
+                `).join('');
+            }
+
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById('totalPrice').textContent = total;
         }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function openCart() {
+            document.getElementById('cartModal').style.display = 'flex';
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').style.display = 'none';
+        }
+
+        // إرسال الطلب عبر الواتساب
+        function sendOrder(e) {
+            e.preventDefault();
+            if (cart.length === 0) {
+                alert("برجاء إضافة منتجات إلى السلة أولاً!");
+                return;
+            }
+
+            const name = document.getElementById('custName').value;
+            const phone = document.getElementById('custPhone').value;
+            const wilaya = document.getElementById('custWilaya').value;
+            const address = document.getElementById('custAddress').value;
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+            let itemsText = cart.map(i => `- ${i.title} (${i.price} دج)`).join('%0A');
+
+            let message = `🛒 *طلب جديد من متجر Abdo OS Pro*%0A%0A` +
+                          `👤 *الاسم:* ${name}%0A` +
+                          `📞 *الهاتف:* ${phone}%0A` +
+                          `📍 *الولاية:* ${wilaya}%0A` +
+                          `🏡 *العنوان/البلدية:* ${address}%0A%0A` +
+                          `📦 *المنتجات المطلوبة:*%0A${itemsText}%0A%0A` +
+                          `💰 *الإجمالي:* ${total} دج`;
+
+            window.open(`https://wa.me/${myWhatsAppNumber}?text=${message}`, '_blank');
+        }
+
+        // تشغيل الوظائف المبدئية عند التحميل
+        renderProducts();
+        renderWilayas();
+        updateCartUI();
     </script>
 </body>
 </html>
