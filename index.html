@@ -3,141 +3,444 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر Abdo Store الإلكتروني</title>
-    <!-- ربط ملف الـ CSS المنظم -->
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="manifest" href="manifest.json">
+    <title>Abdo Store - متجر الجزائر</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #10b981;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 50px;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .nav-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .btn-admin {
+            background-color: #d97706;
+        }
+
+        .cart-badge {
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            margin-right: 4px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .section-title {
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-right: 4px solid var(--primary-color);
+            padding-right: 10px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #334155;
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .product-price {
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            float: left;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+
+        .cart-item, .admin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .form-group {
+            margin-top: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: white;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- شريط التنقل العلوي -->
     <header>
-        <div class="logo">Abdo Store 🛒</div>
+        <div class="logo">📦 Abdo Store - الجزائر</div>
         <div class="nav-btns">
-            <button class="btn" onclick="openModal('cartModal')">السلة <span class="cart-badge" id="cartCount">0</span></button>
+            <button class="btn btn-admin" onclick="openAdmin()">⚙️ مساحة التاجر</button>
+            <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">0</span></button>
         </div>
     </header>
 
-    <!-- المحتوى الرئيسي للمتجر -->
     <div class="container">
         <h2 class="section-title">المنتجات المتوفرة</h2>
-        <div class="products-grid" id="productsGrid">
-            <!-- سيتم تعبئة المنتجات تلقائياً عبر JavaScript -->
-        </div>
+        <div class="products-grid" id="productsGrid"></div>
     </div>
 
-    <!-- نافذة سلة التسوق وإتمام الطلب -->
     <div class="modal" id="cartModal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('cartModal')">&times;</span>
-            <h3 style="margin-bottom: 15px;">سلة المشتريات 🛍️</h3>
-            <div id="cartItemsList"></div>
-            <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
-            <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 15px;">
-                الإجمالي الكلي: <span id="totalPrice" style="color: var(--accent-color);">0</span> دج
-            </div>
-
-            <!-- نموذج بيانات المشتري -->
-            <form id="checkoutForm">
-                <h4 style="margin-bottom: 10px; color: var(--primary-color);">معلومات التوصيل</h4>
+            <span class="close-btn" onclick="closeCart()">&times;</span>
+            <h3>🛒 سلة التسوق</h3>
+            <div id="cartItemsList" style="margin-top: 15px;"></div>
+            <h4 style="margin-top: 15px; text-align: left;">المجموع: <span id="totalPrice" style="color: var(--accent-color);">0</span> دج</h4>
+            <hr style="margin: 20px 0; border-color: #334155;">
+            <h3>📋 معلومات التوصيل (الدفع عند الاستلام)</h3>
+            <form id="orderForm" onsubmit="sendOrder(event)">
                 <div class="form-group">
-                    <label>الاسم الكامل</label>
-                    <input type="text" id="custName" required placeholder="أدخل اسمك الكامل">
+                    <label>الاسم الكامل:</label>
+                    <input type="text" id="custName" required placeholder="مثال: محمد أمين">
                 </div>
                 <div class="form-group">
-                    <label>رقم الهاتف</label>
+                    <label>رقم الهاتف:</label>
                     <input type="tel" id="custPhone" required placeholder="06XXXXXXXX">
                 </div>
                 <div class="form-group">
-                    <label>الولاية</label>
-                    <select id="custWilaya" required></select>
+                    <label>الولاية:</label>
+                    <select id="custWilaya" required>
+                        <option value="">اختر الولاية...</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label>العنوان بالتفصيل</label>
-                    <input type="text" id="custAddress" required placeholder="الحي، الشارع، رقم المنزل">
+                    <label>البلدية / العنوان:</label>
+                    <input type="text" id="custAddress" required placeholder="اسم البلدية أو الحي">
                 </div>
-                <button type="submit" class="submit-btn">إرسال الطلب عبر الواتساب 📲</button>
+                <button type="submit" class="submit-btn">📲 تأكيد الطلب عبر واتساب</button>
             </form>
         </div>
     </div>
 
-    <!-- نافذة تسجيل دخول/تسجيل حساب للتاجر -->
-    <div class="modal" id="authModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('authModal')">&times;</span>
-            
-            <!-- نموذج تسجيل الدخول -->
-            <div id="loginBox">
-                <h3 style="margin-bottom: 15px;">تسجيل دخول التاجر 🔐</h3>
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label>اسم المستخدم</label>
-                        <input type="text" id="loginUser" required>
-                    </div>
-                    <div class="form-group">
-                        <label>كلمة المرور</label>
-                        <input type="password" id="loginPass" required>
-                    </div>
-                    <button type="submit" class="submit-btn">دخول</button>
-                </form>
-                <div class="switch-auth" onclick="toggleAuthMode()">ليس لديك حساب؟ <span>سجل هنا كتاجر جديد</span></div>
-            </div>
-
-            <!-- نموذج إنشاء حساب تاجر جديد -->
-            <div id="registerBox" style="display: none;">
-                <h3 style="margin-bottom: 15px;">إنشاء حساب تاجر جديد 📝</h3>
-                <form id="registerForm">
-                    <div class="form-group">
-                        <label>اسم المتجر / المستخدم</label>
-                        <input type="text" id="regUser" required>
-                    </div>
-                    <div class="form-group">
-                        <label>رقم هاتف المتجر (لاستقبال الطلبات)</label>
-                        <input type="tel" id="regPhone" required placeholder="213600000000">
-                    </div>
-                    <div class="form-group">
-                        <label>كلمة المرور</label>
-                        <input type="password" id="regPass" required>
-                    </div>
-                    <button type="submit" class="submit-btn" style="background-color: var(--primary-color);">تسجيل حساب</button>
-                </form>
-                <div class="switch-auth" onclick="toggleAuthMode()">لديك حساب بالفعل؟ <span>سجل دخولك هنا</span></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- لوحة تحكم التاجر لإضافة المنتجات -->
     <div class="modal" id="adminModal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
-            <h3 style="margin-bottom: 15px;">لوحة تحكم التاجر 📊</h3>
-            
-            <form id="addProductForm">
-                <h4 style="color: var(--primary-color); margin-bottom: 5px;">إضافة منتج جديد</h4>
+            <span class="close-btn" onclick="closeAdmin()">&times;</span>
+            <h3>⚙️ لوحة تحكم التاجر</h3>
+            <form id="addProductForm" onsubmit="addNewProduct(event)" style="margin-top: 15px;">
                 <div class="form-group">
-                    <label>عنوان المنتج</label>
-                    <input type="text" id="newTitle" required placeholder="مثال: حذاء رياضي أنيق">
+                    <label>اسم المنتج:</label>
+                    <input type="text" id="newTitle" required placeholder="مثال: قميص صيفي فاخر">
                 </div>
                 <div class="form-group">
-                    <label>السعر (دج)</label>
-                    <input type="number" id="newPrice" required placeholder="3500">
+                    <label>السعر (دج):</label>
+                    <input type="number" id="newPrice" required placeholder="مثال: 3000">
                 </div>
                 <div class="form-group">
-                    <label>رابط صورة المنتج (URL)</label>
-                    <input type="url" id="newImg" required placeholder="https://...">
+                    <label>رابط الصورة (URL):</label>
+                    <input type="url" id="newImg" required placeholder="ضع رابط صورة المنتج هنا">
                 </div>
-                <button type="submit" class="submit-btn">نشر المنتج في المتجر 🚀</button>
+                <button type="submit" class="submit-btn" style="background-color: var(--primary-color);">➕ إضافة المنتج للمتجر</button>
             </form>
-
-            <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
-            <h4 style="margin-bottom: 10px;">منتجاتي المعروضة</h4>
-            <div id="adminProductsList"></div>
+            <hr style="margin: 20px 0; border-color: #334155;">
+            <h4>قائمة منتجاتك الحالية:</h4>
+            <div id="adminProductsList" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
         </div>
     </div>
 
-    <!-- ربط ملفات الـ JavaScript المنظمة (تأكد من مساراتها إذا كانت داخل مجلد js أو دمجتها) -->
-    <script src="js/products.js"></script>
-    <script src="js/cart.js"></script>
-    <script src="js/app.js"></script>
+    <script>
+        let defaultProducts = [
+            { id: 1, title: "قميص شبابي عصري", price: 2800, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80" },
+            { id: 2, title: "سترة شتوية أنيقة", price: 5500, img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&auto=format&fit=crop&q=80" },
+            { id: 3, title: "سروال جينز ممتاز", price: 3400, img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&auto=format&fit=crop&q=80" },
+            { id: 4, title: "حذاء رياضي مريح", price: 4200, img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&auto=format&fit=crop&q=80" }
+        ];
+
+        let products = JSON.parse(localStorage.getItem('abdo_store_products')) || defaultProducts;
+
+        const wilayas = [
+            "01 - أدرار", "02 - الشلف", "03 - الأغواط", "04 - أم البواقي", "05 - باتنة",
+            "06 - بجاية", "07 - بسكرة", "08 - بشار", "09 - البليدة", "10 - البويرة",
+            "11 - تمنراست", "12 - تبسة", "13 - تلمسان", "14 - تيارت", "15 - تيزي وزو",
+            "16 - الجزائر", "17 - الجلفة", "18 - جيجل", "19 - سطيف", "20 - سعيدة",
+            "21 - سكيكدة", "22 - سيدي بلعباس", "23 - عنابة", "24 - قالمة", "25 - قسنطينة",
+            "26 - المدية", "27 - مستغانم", "28 - المسيلة", "29 - معسكر", "30 - ورقلة",
+            "31 - وهران", "32 - البيض", "33 - إليزي", "34 - برج بوعريريج", "35 - بومرداس",
+            "36 - الطارف", "37 - تندوف", "38 - تسمسيلت", "39 - الوادي", "40 - خنشلة",
+            "41 - سوق أهراس", "42 - تيبازة", "43 - ميلة", "44 - عين الدفلى", "45 - النعامة",
+            "46 - عين تموشنت", "47 - غرداية", "48 - غليزان", "49 - التيميمون", "50 - برج باجي مختار",
+            "51 - أولاد جلال", "52 - بني عباس", "53 - إن صالح", "54 - إن قزام", "55 - تقرت",
+            "56 - المغير", "57 - المنيعة", "58 - الدبداب"
+        ];
+
+        let cart = [];
+        const myWhatsAppNumber = "213600000000"; // ⚠️ غيّر هذا الرقم برقم هاتفك
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = products.map(p => `
+                <div class="product-card">
+                    <img src="${p.img}" alt="${p.title}" class="product-img">
+                    <div class="product-info">
+                        <div class="product-title">${p.title}</div>
+                        <div class="product-price">${p.price} دج</div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${p.id})">إضافة إلى السلة 🛒</button>
+                    </div>
+                </div>
+            `).join('');
+            renderAdminProductsList();
+        }
+
+        function renderWilayas() {
+            const select = document.getElementById('custWilaya');
+            select.innerHTML = '<option value="">اختر الولاية...</option>';
+            wilayas.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = w;
+                opt.textContent = w;
+                select.appendChild(opt);
+            });
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            document.getElementById('cartCount').textContent = cart.length;
+            const list = document.getElementById('cartItemsList');
+            if (cart.length === 0) {
+                list.innerHTML = "<p style='color: #94a3b8;'>السلة فارغة حالياً.</p>";
+            } else {
+                list.innerHTML = cart.map((item, index) => `
+                    <div class="cart-item">
+                        <span>${item.title}</span>
+                        <span><b>${item.price} دج</b> <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; margin-right:10px;">❌</button></span>
+                    </div>
+                `).join('');
+            }
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById('totalPrice').textContent = total;
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function openCart() { document.getElementById('cartModal').style.display = 'flex'; }
+        function closeCart() { document.getElementById('cartModal').style.display = 'none'; }
+        
+        function openAdmin() { document.getElementById('adminModal').style.display = 'flex'; }
+        function closeAdmin() { document.getElementById('adminModal').style.display = 'none'; }
+
+        function addNewProduct(e) {
+            e.preventDefault();
+            const title = document.getElementById('newTitle').value;
+            const price = Number(document.getElementById('newPrice').value);
+            const img = document.getElementById('newImg').value;
+
+            const newProd = { id: Date.now(), title, price, img };
+            products.push(newProd);
+            localStorage.setItem('abdo_store_products', JSON.stringify(products));
+            
+            renderProducts();
+            document.getElementById('addProductForm').reset();
+            alert("تم إضافة المنتج بنجاح!");
+        }
+
+        function renderAdminProductsList() {
+            const list = document.getElementById('adminProductsList');
+            if (products.length === 0) {
+                list.innerHTML = "<p style='color: #94a3b8;'>لا توجد منتجات.</p>";
+                return;
+            }
+            list.innerHTML = products.map(p => `
+                <div class="admin-item">
+                    <span>${p.title} (${p.price} دج)</span>
+                    <button class="delete-btn" onclick="deleteProduct(${p.id})">حذف</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteProduct(id) {
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem('abdo_store_products', JSON.stringify(products));
+            renderProducts();
+        }
+
+        function sendOrder(e) {
+            e.preventDefault();
+            if (cart.length === 0) {
+                alert("السلة فارغة!");
+                return;
+            }
+
+            const name = document.getElementById('custName').value;
+            const phone = document.getElementById('custPhone').value;
+            const wilaya = document.getElementById('custWilaya').value;
+            const address = document.getElementById('custAddress').value;
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+            let itemsText = cart.map(i => `- ${i.title} (${i.price} دج)`).join('%0A');
+            let message = `🛒 *طلب جديد من متجر Abdo OS Pro*%0A%0A👤 *الاسم:* ${name}%0A📞 *الهاتف:* ${phone}%0A📍 *الولاية:* ${wilaya}%0A🏡 *العنوان:* ${address}%0A%0A📦 *المنتجات:*%0A${itemsText}%0A%0A💰 *الإجمالي:* ${total} دج`;
+
+            window.open(`https://wa.me/${myWhatsAppNumber}?text=${message}`, '_blank');
+        }
+
+        renderProducts();
+        renderWilayas();
+        updateCartUI();
+    </script>
 </body>
 </html>
