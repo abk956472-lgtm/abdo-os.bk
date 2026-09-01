@@ -3,613 +3,294 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdo OS - منصة التجارة الإلكترونية بالجزائر</title>
-    <!-- مكتبة Supabase للاتصال بقاعدة البيانات الحقيقية -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>متجر العميل العصري</title>
     <style>
-        :root {
-            --primary-color: #2563eb;
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --accent-color: #10b981;
-            --danger-color: #ef4444;
-            --warning-color: #d97706;
-        }
-
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
+            font-family: 'Tahoma', sans-serif;
         }
-
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding-bottom: 50px;
+            background-color: #f4f7f6;
+            color: #333;
         }
-
         header {
-            background-color: var(--card-bg);
+            background-color: #2c3e50;
+            color: white;
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
-
         .logo {
-            font-size: 1.4rem;
+            font-size: 22px;
             font-weight: bold;
-            color: var(--primary-color);
         }
-
-        .nav-btns {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .btn {
-            background-color: var(--primary-color);
+        .nav-btns button {
+            background-color: #3498db;
             color: white;
             border: none;
             padding: 8px 15px;
-            border-radius: 20px;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 14px;
         }
-
-        .btn-admin { background-color: var(--warning-color); }
-        .btn-auth { background-color: #475569; }
-
-        .cart-badge {
-            background-color: var(--danger-color);
-            color: white;
-            border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 0.75rem;
-            margin-right: 4px;
-        }
-
         .container {
             max-width: 1200px;
             margin: 20px auto;
             padding: 0 15px;
         }
-
-        .section-title {
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-            border-right: 4px solid var(--primary-color);
-            padding-right: 10px;
-        }
-
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
         }
-
         .product-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
+            background: white;
+            border-radius: 8px;
             overflow: hidden;
-            border: 1px solid #334155;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.2s;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .product-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            background-color: #334155;
-        }
-
-        .product-info {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
             padding: 15px;
         }
-
-        .product-title {
-            font-size: 1.1rem;
-            margin-bottom: 8px;
-        }
-
-        .product-price {
-            color: var(--accent-color);
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-bottom: 12px;
-        }
-
-        .vendor-tag {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            margin-bottom: 8px;
-        }
-
-        .add-to-cart-btn {
+        .product-img {
             width: 100%;
-            background-color: var(--primary-color);
+            height: 200px;
+            object-fit: cover;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+        }
+        .product-title {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .product-price {
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .buy-btn {
+            background-color: #25d366;
             color: white;
             border: none;
             padding: 10px;
-            border-radius: 6px;
+            width: 100%;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 0.95rem;
+            font-size: 16px;
             font-weight: bold;
         }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 200;
-            justify-content: center;
-            align-items: center;
+        .buy-btn:hover {
+            background-color: #1ebd56;
         }
-
-        .modal-content {
-            background-color: var(--card-bg);
-            width: 90%;
-            max-width: 500px;
-            border-radius: 12px;
+        
+        .admin-section {
+            background: white;
             padding: 20px;
-            max-height: 90vh;
-            overflow-y: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: none;
         }
-
-        .close-btn {
-            float: left;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #94a3b8;
-        }
-
-        .cart-item, .admin-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #334155;
-        }
-
         .form-group {
-            margin-top: 15px;
+            margin-bottom: 15px;
         }
-
         .form-group label {
             display: block;
             margin-bottom: 5px;
-            font-size: 0.9rem;
+            font-weight: bold;
         }
-
-        .form-group input, .form-group select {
+        .form-group input {
             width: 100%;
             padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #334155;
-            background-color: #0f172a;
-            color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
-
-        .submit-btn {
-            width: 100%;
-            background-color: var(--accent-color);
+        .action-btn {
+            background-color: #2c3e50;
             color: white;
             border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 1.1rem;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
             font-weight: bold;
-            margin-top: 20px;
-            cursor: pointer;
-        }
-
-        .delete-btn {
-            background-color: var(--danger-color);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        .role-selector {
-            display: flex;
-            gap: 15px;
-            margin-top: 10px;
-        }
-        .role-selector label {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">📦 Abdo Store - الجزائر</div>
-        <div class="nav-btns" id="navButtons">
-            <button class="btn btn-auth" onclick="openAuthModal()">👤 تسجيل الدخول / حساب جديد</button>
-            <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">0</span></button>
+        <div class="logo">متجر العميل العصري</div>
+        <div class="nav-btns">
+            <button onclick="openAdminPortal()">🔐 دخول لوحة التاجر</button>
         </div>
     </header>
 
     <div class="container">
-        <h2 class="section-title">المنتجات المتوفرة</h2>
-        <div class="products-grid" id="productsGrid"></div>
-    </div>
 
-    <!-- نافذة تسجيل الدخول / إنشاء حساب -->
-    <div class="modal" id="authModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeAuthModal()">&times;</span>
-            <h3 id="authTitle">🔐 تسجيل الدخول أو حساب جديد</h3>
-            
-            <form id="authForm" onsubmit="handleAuth(event)" style="margin-top: 15px;">
-                <div class="form-group" id="roleGroup">
-                    <label>اختر نوع الحساب:</label>
-                    <div class="role-selector">
-                        <label><input type="radio" name="userRole" value="customer" checked> زبون 🛒</label>
-                        <label><input type="radio" name="userRole" value="vendor"> تاجر ⚙️</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>البريد الإلكتروني:</label>
-                    <input type="email" id="authEmail" required placeholder="name@example.com">
-                </div>
-                <div class="form-group">
-                    <label>كلمة المرور:</label>
-                    <input type="password" id="authPassword" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="submit-btn">🚀 دخول / تسجيل</button>
-            </form>
+        <!-- نموذج تسجيل الدخول للتاجر -->
+        <div id="loginBox" class="admin-section">
+            <h3>تسجيل دخول لوحة التحكم</h3>
+            <div class="form-group">
+                <label>اسم المستخدم:</label>
+                <input type="text" id="username" placeholder="اسم المستخدم">
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور:</label>
+                <input type="password" id="password" placeholder="كلمة المرور">
+            </div>
+            <button class="action-btn" onclick="checkLogin()">دخول</button>
         </div>
-    </div>
 
-    <!-- نافذة سلة التسوق -->
-    <div class="modal" id="cartModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeCart()">&times;</span>
-            <h3>🛒 سلة التسوق</h3>
-            <div id="cartItemsList" style="margin-top: 15px;"></div>
-            <h4 style="margin-top: 15px; text-align: left;">المجموع: <span id="totalPrice" style="color: var(--accent-color);">0</span> دج</h4>
-            <hr style="margin: 20px 0; border-color: #334155;">
-            <h3>📋 معلومات التوصيل (الدفع عند الاستلام)</h3>
-            <form id="orderForm" onsubmit="sendOrder(event)">
-                <div class="form-group">
-                    <label>الاسم الكامل:</label>
-                    <input type="text" id="custName" required placeholder="مثال: محمد أمين">
-                </div>
-                <div class="form-group">
-                    <label>رقم الهاتف:</label>
-                    <input type="tel" id="custPhone" required placeholder="06XXXXXXXX">
-                </div>
-                <div class="form-group">
-                    <label>الولاية:</label>
-                    <select id="custWilaya" required>
-                        <option value="">اختر الولاية...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>البلدية / العنوان:</label>
-                    <input type="text" id="custAddress" required placeholder="اسم البلدية أو الحي">
-                </div>
-                <button type="submit" class="submit-btn">📲 تأكيد الطلب عبر واتساب</button>
-            </form>
+        <!-- لوحة تحكم التاجر لإضافة المنتجات -->
+        <div id="adminPanel" class="admin-section">
+            <h3 style="color: #27ae60; margin-bottom: 15px;">لوحة تحكم التاجر: أضف منتجاً جديداً (سحابياً)</h3>
+            <div class="form-group">
+                <label>اسم المنتج:</label>
+                <input type="text" id="newTitle" placeholder="مثال: قميص رجالي فاخر">
+            </div>
+            <div class="form-group">
+                <label>السعر:</label>
+                <input type="text" id="newPrice" placeholder="مثال: 3200 دج">
+            </div>
+            <button class="action-btn" onclick="addNewProductCloud()" style="background-color: #27ae60;">حفظ المنتج سحابياً</button>
         </div>
-    </div>
 
-    <!-- نافذة مساحة التاجر -->
-    <div class="modal" id="adminModal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeAdmin()">&times;</span>
-            <h3>⚙️ لوحة تحكم التاجر المستقلة</h3>
-            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 5px;" id="vendorEmailDisplay"></p>
-            
-            <form id="addProductForm" onsubmit="addNewProduct(event)" style="margin-top: 15px;">
-                <div class="form-group">
-                    <label>اسم المنتج:</label>
-                    <input type="text" id="newTitle" required placeholder="مثال: قميص صيفي فاخر">
-                </div>
-                <div class="form-group">
-                    <label>السعر (دج):</label>
-                    <input type="number" id="newPrice" required placeholder="مثال: 3000">
-                </div>
-                <div class="form-group">
-                    <label>رابط الصورة (URL):</label>
-                    <input type="url" id="newImg" required placeholder="ضع رابط صورة المنتج هنا">
-                </div>
-                <button type="submit" class="submit-btn" style="background-color: var(--primary-color);">➕ إضافة المنتج للمتجر العام</button>
-            </form>
-            <hr style="margin: 20px 0; border-color: #334155;">
-            <h4>منتجاتك الخاصة:</h4>
-            <div id="adminProductsList" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
+        <h2 style="margin-bottom: 20px; text-align: center;">قائمة المنتجات المتوفرة</h2>
+        
+        <!-- شبكة المنتجات -->
+        <div class="products-grid" id="productsGrid">
+            <p style="text-align: center; grid-column: 1/-1;">جاري تحميل المنتجات من السحاب...</p>
         </div>
     </div>
 
     <script>
-        // إعدادات الاتصال بـ Supabase (بدون مفتاح - فارغ تماماً حالياً)
-        const SUPABASE_URL = 'https://lvthnzfubbrhyfnwqaxs.supabase.co';
-        const SUPABASE_KEY = ''; // ضع مفتاح الـ anon الخاص بك هنا لاحقاً بين علامتي التنصيص إن أردت ربطه
-        
-        const supabaseClient = (SUPABASE_KEY && SUPABASE_KEY !== '') ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+        // رقم واتساب الزبون
+        const clientWhatsAppNumber = "213562957309"; 
 
-        let products = [];
-        let cart = [];
-        let currentUser = null;
-        let userRole = 'customer'; 
-        const myWhatsAppNumber = "213600000000"; // رقم الواتساب الخاص بك
+        // بيانات التاجر
+        const adminUser = "admin";
+        const adminPass = "1234";
 
-        const wilayas = [
-            "01 - أدرار", "02 - الشلف", "03 - الأغواط", "04 - أم البواقي", "05 - باتنة",
-            "06 - بجاية", "07 - بسكرة", "08 - بشار", "09 - البليدة", "10 - البويرة",
-            "11 - تمنراست", "12 - تبسة", "13 - تلمسان", "14 - تيارت", "15 - تيزي وزو",
-            "16 - الجزائر", "17 - الجلفة", "18 - جيجل", "19 - سطيف", "20 - سعيدة",
-            "21 - سكيكدة", "22 - سيدي بلعباس", "23 - عنابة", "24 - قالمة", "25 - قسنطينة",
-            "26 - المدية", "27 - مستغانم", "28 - المسيلة", "29 - معسكر", "30 - ورقلة",
-            "31 - وهران", "32 - البيض", "33 - إليزي", "34 - برج بوعريريج", "35 - بومرداس",
-            "36 - الطارف", "37 - تندوف", "38 - تسمسيلت", "39 - الوادي", "40 - خنشلة",
-            "41 - سوق أهراس", "42 - تيبازة", "43 - ميلة", "44 - عين الدفلى", "45 - النعامة",
-            "46 - عين تموشنت", "47 - غرداية", "48 - غليزان", "49 - التيميمون", "50 - برج باجي مختار",
-            "51 - أولاد جلال", "52 - بني عباس", "53 - إن صالح", "54 - إن قزام", "55 - تقرت",
-            "56 - المغير", "57 - المنيعة", "58 - الدبداب"
-        ];
+        // معلومات السحاب الخاصة بك
+        const BIN_ID = "6a96e01223a2f6593e5a147b"; 
+        const API_KEY = "$2a$10$J75l.VfvTJT.df3ntnHrj.xq8.NseTPAKkgDYV5/5wkCWJ9haC2d0"; 
 
+        // جلب المنتجات من السحاب
         async function fetchProducts() {
-            if (!supabaseClient) {
-                loadDefaultProducts();
-                return;
-            }
             try {
-                const { data, error } = await supabaseClient.from('products').select('*');
-                if (error) {
-                    loadDefaultProducts();
-                } else {
-                    products = data || [];
-                    if (products.length === 0) loadDefaultProducts();
-                    renderProducts();
-                }
-            } catch (err) {
-                loadDefaultProducts();
+                let response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': API_KEY }
+                });
+                let data = await response.json();
+                return data.record;
+            } catch (error) {
+                console.error("خطأ في جلب البيانات:", error);
+                return [
+                    { title: "هودي عصري أنيق", price: "3500 دج" },
+                    { title: "سروال جينز كلاسيك", price: "2800 دج" }
+                ];
             }
         }
 
-        function loadDefaultProducts() {
-            products = [
-                { id: 1, title: "قميص شبابي عصري (معاينة محلية)", price: 2800, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80", vendor: "متجر المنصة" }
-            ];
-            renderProducts();
-        }
+        // عرض المنتجات على الشاشة
+        async function renderProducts() {
+            let grid = document.getElementById('productsGrid');
+            let products = await fetchProducts();
+            grid.innerHTML = '';
 
-        function renderProducts() {
-            const grid = document.getElementById('productsGrid');
-            if(!grid) return;
-            grid.innerHTML = products.map(p => `
-                <div class="product-card">
-                    <img src="${p.img}" alt="${p.title}" class="product-img">
-                    <div class="product-info">
-                        <div class="vendor-tag">بواسطة: ${p.vendor || 'متجر معتمد'}</div>
-                        <div class="product-title">${p.title}</div>
-                        <div class="product-price">${p.price} دج</div>
-                        <button class="add-to-cart-btn" onclick="addToCart('${p.id}')">إضافة إلى السلة 🛒</button>
-                    </div>
-                </div>
-            `).join('');
-            if (currentUser && userRole === 'vendor') {
-                renderAdminProductsList();
+            if(!Array.isArray(products)) {
+                products = [];
             }
-        }
 
-        function renderWilayas() {
-            const select = document.getElementById('custWilaya');
-            if(!select) return;
-            select.innerHTML = '<option value="">اختر الولاية...</option>';
-            wilayas.forEach(w => {
-                const opt = document.createElement('option');
-                opt.value = w;
-                opt.textContent = w;
-                select.appendChild(opt);
+            products.forEach(product => {
+                let card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div class="product-img">صورة المنتج</div>
+                    <div class="product-title">${product.title}</div>
+                    <div class="product-price">${product.price}</div>
+                    <button class="buy-btn" onclick="orderOnWhatsApp('${product.title}', '${product.price}')">اطلب عبر واتساب</button>
+                `;
+                grid.appendChild(card);
             });
         }
 
-        async function handleAuth(e) {
-            e.preventDefault();
-            if (!supabaseClient) {
-                alert("لم يتم ربط قاعدة البيانات بعد. هذا وضع معاينة محلية.");
+        function openAdminPortal() {
+            let loginBox = document.getElementById('loginBox');
+            let adminPanel = document.getElementById('adminPanel');
+            if (loginBox.style.display === 'block' || adminPanel.style.display === 'block') {
+                loginBox.style.display = 'none';
+                adminPanel.style.display = 'none';
+            } else {
+                loginBox.style.display = 'block';
+            }
+        }
+
+        function checkLogin() {
+            let user = document.getElementById('username').value;
+            let pass = document.getElementById('password').value;
+            if (user === adminUser && pass === adminPass) {
+                alert('تم تسجيل الدخول بنجاح!');
+                document.getElementById('loginBox').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+            } else {
+                alert('خطأ في البيانات!');
+            }
+        }
+
+        // إضافة المنتج وحفظه سحابياً ليراه الجميع
+        async function addNewProductCloud() {
+            let title = document.getElementById('newTitle').value;
+            let price = document.getElementById('newPrice').value;
+
+            if (title === '' || price === '') {
+                alert('الرجاء تعبئة الحقول!');
                 return;
             }
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
-            const selectedRole = document.querySelector('input[name="userRole"]:checked').value;
 
-            let { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            let products = await fetchProducts();
+            if(!Array.isArray(products)) products = [];
             
-            if (error) {
-                let signupRes = await supabaseClient.auth.signUp({ 
-                    email, 
-                    password,
-                    options: { data: { role: selectedRole } }
+            products.unshift({ title: title, price: price });
+
+            try {
+                let response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify(products)
                 });
-                if (signupRes.error) {
-                    alert("خطأ: " + signupRes.error.message);
-                    return;
-                }
-                alert("تم إنشاء الحساب بنجاح وتسجيل دخولك!");
-                currentUser = signupRes.data.user;
-            } else {
-                alert("مرحباً بك، تم تسجيل الدخول بنجاح!");
-                currentUser = data.user;
-            }
 
-            userRole = selectedRole;
-            updateNavUI();
-            closeAuthModal();
-        }
-
-        function updateNavUI() {
-            const nav = document.getElementById('navButtons');
-            if (!nav) return;
-            if (currentUser) {
-                if (userRole === 'vendor') {
-                    nav.innerHTML = `
-                        <button class="btn btn-admin" onclick="openAdmin()">⚙️ لوحة التاجر</button>
-                        <button class="btn btn-auth" onclick="logout()">خروج 🚪</button>
-                        <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">${cart.length}</span></button>
-                    `;
+                if (response.ok) {
+                    alert('تمت إضافة المنتج بنجاح وأصبح ظاهراً للجميع على كل الأجهزة!');
+                    document.getElementById('newTitle').value = '';
+                    document.getElementById('newPrice').value = '';
+                    renderProducts();
                 } else {
-                    nav.innerHTML = `
-                        <span style="font-size: 0.85rem; color: #10b981;">أهلاً بك</span>
-                        <button class="btn btn-auth" onclick="logout()">خروج 🚪</button>
-                        <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">${cart.length}</span></button>
-                    `;
+                    alert('حدث خطأ أثناء الحفظ السحابي.');
                 }
+            } catch (e) {
+                alert('فشل الاتصال بالإنترنت.');
             }
         }
 
-        async function logout() {
-            if(supabaseClient) await supabaseClient.auth.signOut();
-            currentUser = null;
-            userRole = 'customer';
-            location.reload();
+        function orderOnWhatsApp(productName, productPrice) {
+            let message = `مرحباً، أريـد طلب هذا المنتج:\n*${productName}*\nالسعر: ${productPrice}`;
+            window.open(`https://wa.me/${clientWhatsAppNumber}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
-        async function addNewProduct(e) {
-            e.preventDefault();
-            if (!currentUser || userRole !== 'vendor' || !supabaseClient) return;
-
-            const title = document.getElementById('newTitle').value;
-            const price = Number(document.getElementById('newPrice').value);
-            const img = document.getElementById('newImg').value;
-            const vendorEmail = currentUser.email;
-
-            const { error } = await supabaseClient
-                .from('products')
-                .insert([{ title, price, img, vendor: vendorEmail }]);
-
-            if (error) {
-                alert("فشل في إضافة المنتج: " + error.message);
-            } else {
-                alert("تم إضافة المنتج بنجاح!");
-                document.getElementById('addProductForm').reset();
-                fetchProducts();
-            }
-        }
-
-        function renderAdminProductsList() {
-            const list = document.getElementById('adminProductsList');
-            if(!list || !currentUser) return;
-            const myProducts = products.filter(p => p.vendor === currentUser.email);
-            
-            if (myProducts.length === 0) {
-                list.innerHTML = "<p style='color: #94a3b8;'>ليس لديك منتجات مضافة حالياً.</p>";
-                return;
-            }
-            list.innerHTML = myProducts.map(p => `
-                <div class="admin-item">
-                    <span>${p.title} (${p.price} دج)</span>
-                    <button class="delete-btn" onclick="deleteProduct('${p.id}')">حذف</button>
-                </div>
-            `).join('');
-        }
-
-        async function deleteProduct(id) {
-            if(!supabaseClient) return;
-            const { error } = await supabaseClient.from('products').delete().eq('id', id);
-            if (error) {
-                alert("خطأ في الحذف: " + error.message);
-            } else {
-                fetchProducts();
-            }
-        }
-
-        function addToCart(id) {
-            const product = products.find(p => String(p.id) === String(id));
-            if(product) {
-                cart.push(product);
-                updateCartUI();
-            }
-        }
-
-        function updateCartUI() {
-            const badge = document.getElementById('cartCount');
-            if(badge) badge.textContent = cart.length;
-            
-            const list = document.getElementById('cartItemsList');
-            if (!list) return;
-
-            if (cart.length === 0) {
-                list.innerHTML = "<p style='color: #94a3b8;'>السلة فارغة حالياً.</p>";
-            } else {
-                list.innerHTML = cart.map((item, index) => `
-                    <div class="cart-item">
-                        <span>${item.title}</span>
-                        <span><b>${item.price} دج</b> <button onclick="removeFromCart(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; margin-right:10px;">❌</button></span>
-                    </div>
-                `).join('');
-            }
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-            const totalElem = document.getElementById('totalPrice');
-            if(totalElem) totalElem.textContent = total;
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCartUI();
-        }
-
-        function openAuthModal() { document.getElementById('authModal').style.display = 'flex'; }
-        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
-        function openCart() { document.getElementById('cartModal').style.display = 'flex'; }
-        function closeCart() { document.getElementById('cartModal').style.display = 'none'; }
-        function openAdmin() { 
-            document.getElementById('adminModal').style.display = 'flex'; 
-            document.getElementById('vendorEmailDisplay').textContent = "التاجر: " + (currentUser ? currentUser.email : '');
-            renderAdminProductsList();
-        }
-        function closeAdmin() { document.getElementById('adminModal').style.display = 'none'; }
-
-        function sendOrder(e) {
-            e.preventDefault();
-            if (cart.length === 0) {
-                alert("السلة فارغة!");
-                return;
-            }
-
-            const name = document.getElementById('custName').value;
-            const phone = document.getElementById('custPhone').value;
-            const wilaya = document.getElementById('custWilaya').value;
-            const address = document.getElementById('custAddress').value;
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-
-            let itemsText = cart.map(i => `- ${i.title} (${i.price} دج)`).join('%0A');
-            let message = `🛒 *طلب جديد من متجر Abdo Store*%0A%0A👤 *الاسم:* ${name}%0A📞 *الهاتف:* ${phone}%0A📍 *الولاية:* ${wilaya}%0A🏡 *العنوان:* ${address}%0A%0A📦 *المنتجات:*%0A${itemsText}%0A%0A💰 *الإجمالي:* ${total} دج`;
-
-            window.open(`https://wa.me/${myWhatsAppNumber}?text=${message}`, '_blank');
-        }
-
-        renderWilayas();
-        fetchProducts();
+        window.onload = renderProducts;
     </script>
+
 </body>
 </html>
