@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdo OS - منصة التجارة الإلكترونية بالجزائر</title>
+    <title>Abdo Store - منصة التجارة الإلكترونية بالجزائر</title>
     <!-- مكتبة Supabase للاتصال بقاعدة البيانات الحقيقية -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -250,8 +250,7 @@
     <header>
         <div class="logo">📦 Abdo Store - الجزائر</div>
         <div class="nav-btns" id="navButtons">
-            <button class="btn btn-auth" onclick="openAuthModal()">👤 تسجيل الدخول / حساب جديد</button>
-            <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">0</span></button>
+            <!-- سيتم التحكم في عرض الأزرار ديناميكياً هنا -->
         </div>
     </header>
 
@@ -279,7 +278,7 @@
                     <input type="email" id="authEmail" required placeholder="name@example.com">
                 </div>
                 <div class="form-group">
-                    <label>كلمة المرور:</label>
+                    <label>كلمة المرور (6 أحرف على الأقل):</label>
                     <input type="password" id="authPassword" required placeholder="••••••••">
                 </div>
                 <button type="submit" class="submit-btn">🚀 دخول / تسجيل</button>
@@ -343,13 +342,12 @@
                 <button type="submit" class="submit-btn" style="background-color: var(--primary-color);">➕ إضافة المنتج للمتجر العام</button>
             </form>
             <hr style="margin: 20px 0; border-color: #334155;">
-            <h4>منتجاتك الخاصة:</h4>
+            <h4>منتجاتك الخاصة (إدارة / حذف):</h4>
             <div id="adminProductsList" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
         </div>
     </div>
 
     <script>
-        // إعدادات الاتصال بـ Supabase مع الرابط والمفتاح الخاص بك
         const SUPABASE_URL = 'https://lvthnzfubbrhyfnwqaxs.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_dxFosZXqkQfgc0qexLu0jw_FJ8xLY_G';
         
@@ -359,7 +357,7 @@
         let cart = [];
         let currentUser = null;
         let userRole = 'customer'; 
-        const myWhatsAppNumber = "213600000000"; // رقم الواتساب الخاص بك
+        const myWhatsAppNumber = "213600000000"; 
 
         const wilayas = [
             "01 - أدرار", "02 - الشلف", "03 - الأغواط", "04 - أم البواقي", "05 - باتنة",
@@ -376,13 +374,25 @@
             "56 - المغير", "57 - المنيعة", "58 - الدبداب"
         ];
 
+        async function initApp() {
+            renderWilayas();
+            if (supabaseClient) {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session && session.user) {
+                    currentUser = session.user;
+                    userRole = currentUser.user_metadata?.role || 'customer';
+                }
+            }
+            updateNavUI();
+            fetchProducts();
+        }
+
         async function fetchProducts() {
             if (!supabaseClient) {
                 loadDefaultProducts();
                 return;
             }
             try {
-                // جلب المنتجات من الجدول الجديد market_products
                 const { data, error } = await supabaseClient.from('market_products').select('*');
                 if (error) {
                     loadDefaultProducts();
@@ -440,7 +450,7 @@
                 alert("لم يتم ربط قاعدة البيانات بعد.");
                 return;
             }
-            const email = document.getElementById('authEmail').value;
+            const email = document.getElementById('authEmail').value.trim();
             const password = document.getElementById('authPassword').value;
             const selectedRole = document.querySelector('input[name="userRole"]:checked').value;
 
@@ -466,19 +476,29 @@
             userRole = selectedRole;
             updateNavUI();
             closeAuthModal();
+            fetchProducts();
         }
 
         function updateNavUI() {
             const nav = document.getElementById('navButtons');
             if (!nav) return;
-            if (currentUser) {
+
+            if (!currentUser) {
+                // في حال لم يتم تسجيل الدخول (عرض زر تسجيل الدخول والسلة فقط)
+                nav.innerHTML = `
+                    <button class="btn btn-auth" onclick="openAuthModal()">👤 تسجيل الدخول / حساب جديد</button>
+                    <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">${cart.length}</span></button>
+                `;
+            } else {
                 if (userRole === 'vendor') {
+                    // إذا كان مسجلاً كتاجر (إخفاء زر تسجيل الدخول ووضعه مكانه زر لوحة التاجر)
                     nav.innerHTML = `
                         <button class="btn btn-admin" onclick="openAdmin()">⚙️ لوحة التاجر</button>
                         <button class="btn btn-auth" onclick="logout()">خروج 🚪</button>
                         <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">${cart.length}</span></button>
                     `;
                 } else {
+                    // إذا كان مسجلاً كزبون
                     nav.innerHTML = `
                         <span style="font-size: 0.85rem; color: #10b981;">أهلاً بك</span>
                         <button class="btn btn-auth" onclick="logout()">خروج 🚪</button>
@@ -492,7 +512,8 @@
             if(supabaseClient) await supabaseClient.auth.signOut();
             currentUser = null;
             userRole = 'customer';
-            location.reload();
+            updateNavUI();
+            fetchProducts();
         }
 
         async function addNewProduct(e) {
@@ -504,7 +525,6 @@
             const img = document.getElementById('newImg').value;
             const vendorEmail = currentUser.email;
 
-            // الإضافة إلى الجدول الجديد market_products
             const { error } = await supabaseClient
                 .from('market_products')
                 .insert([{ title, price, img, vendor: vendorEmail }]);
@@ -530,18 +550,20 @@
             list.innerHTML = myProducts.map(p => `
                 <div class="admin-item">
                     <span>${p.title} (${p.price} دج)</span>
-                    <button class="delete-btn" onclick="deleteProduct('${p.id}')">حذف</button>
+                    <button class="delete-btn" onclick="deleteProduct('${p.id}')">حذف 🗑️</button>
                 </div>
             `).join('');
         }
 
         async function deleteProduct(id) {
             if(!supabaseClient) return;
-            // الحذف من الجدول الجديد market_products
+            if(!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+            
             const { error } = await supabaseClient.from('market_products').delete().eq('id', id);
             if (error) {
                 alert("خطأ في الحذف: " + error.message);
             } else {
+                alert("تم حذف المنتج بنجاح!");
                 fetchProducts();
             }
         }
@@ -611,8 +633,8 @@
             window.open(`https://wa.me/${myWhatsAppNumber}?text=${message}`, '_blank');
         }
 
-        renderWilayas();
-        fetchProducts();
+        // تشغيل التطبيق عند التحميل
+        initApp();
     </script>
 </body>
 </html>
