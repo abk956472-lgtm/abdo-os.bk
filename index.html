@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0b1220">
-    <meta name="description" content="Abdo Store - منصة التجارة الإلكترونية في الجزائر">
+    <meta name="description" content="Abdo Store - منصة التجارة الإلكترونية متعددة البائعين في الجزائر">
     <title>Abdo Store | الجزائر</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -124,6 +124,7 @@
         .product-card {
             overflow: hidden; position: relative; background: linear-gradient(180deg, var(--card), var(--bg-soft));
             border: 1px solid var(--border); border-radius: var(--radius); transition: .25s ease;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
         .product-card:hover { transform: translateY(-5px); border-color: rgba(59,130,246,.3); box-shadow: 0 18px 40px rgba(0,0,0,.25); }
 
@@ -139,14 +140,20 @@
         }
         .thumb-gallery img.active { opacity: 1; border-color: var(--primary); }
 
-        .product-body { padding: 16px; }
+        .product-body { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; }
         .product-title {
             font-size: 17px; font-weight: 850; margin-bottom: 7px;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 54px;
         }
-        .product-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
+        .product-footer { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .price-row { display: flex; justify-content: space-between; align-items: center; }
         .price { color: #34d399; font-size: 19px; font-weight: 950; white-space: nowrap; }
-        .add-cart { flex: 1; padding: 10px; border-radius: 11px; border: 0; color: white; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
+        
+        .btn-whatsapp-order {
+            width: 100%; padding: 10px; border-radius: 11px; border: 0; color: white; font-weight: 800;
+            background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; text-align: center;
+        }
+        .btn-whatsapp-order:hover { opacity: 0.9; }
 
         .empty { text-align: center; padding: 70px 20px; border: 1px dashed var(--border); border-radius: var(--radius); background: rgba(255,255,255,.02); grid-column: 1 / -1; }
         .empty-icon { font-size: 45px; margin-bottom: 10px; }
@@ -170,12 +177,6 @@
         .role-option { border: 1px solid var(--border); border-radius: 13px; padding: 12px; background: var(--bg-soft); cursor: pointer; }
         .role-option:has(input:checked) { border-color: var(--primary); background: rgba(59,130,246,.1); }
         .form-note { color: var(--muted); font-size: 12px; margin-top: 10px; }
-
-        .cart-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
-        .cart-item { display: grid; grid-template-columns: 65px 1fr auto; gap: 12px; align-items: center; padding: 10px; border-radius: 14px; background: var(--bg-soft); border: 1px solid var(--border); }
-        .cart-item-image { width: 65px; height: 65px; object-fit: cover; border-radius: 11px; }
-        .cart-total { display: flex; justify-content: space-between; align-items: center; padding: 15px; margin-bottom: 18px; border-radius: 14px; background: linear-gradient(135deg, rgba(16,185,129,.1), rgba(59,130,246,.08)); border: 1px solid var(--border); }
-        .total-value { color: #34d399; font-size: 22px; font-weight: 950; }
 
         .toast-container { position: fixed; left: 18px; bottom: 18px; z-index: 3000; display: flex; flex-direction: column; gap: 9px; }
         .toast { min-width: 260px; max-width: 360px; padding: 13px 15px; border-radius: 13px; background: #111827; border: 1px solid var(--border); box-shadow: var(--shadow); font-size: 14px; }
@@ -201,14 +202,10 @@
             <span class="brand-icon">📦</span>
             <span>
                 Abdo Store
-                <small>منصة التجارة الإلكترونية 🇩🇿</small>
+                <small>منصة متعددة البائعين 🇩🇿</small>
             </span>
         </a>
         <nav class="nav">
-            <button class="btn cart-button" id="cartBtn">
-                🛒 السلة
-                <span class="cart-count hidden" id="cartCount">0</span>
-            </button>
             <button class="btn hidden" id="adminBtn">🏪 لوحة البائع</button>
             <button class="btn" id="loginBtn">🔐 الدخول</button>
             <button class="btn btn-danger hidden" id="logoutBtn">خروج</button>
@@ -220,9 +217,9 @@
     <div class="container">
         <div class="hero-box">
             <div class="hero-content">
-                <span class="badge">🇩🇿 متجر جزائري • سريع • بسيط</span>
+                <span class="badge">🇩🇿 متجر متعدد البائعين • طلب مباشر</span>
                 <h1>مرحبًا بك في <span class="gradient-text">Abdo Store</span></h1>
-                <p>اكتشف المنتجات، أضفها إلى سلتك، وأرسل طلبك مباشرة عبر WhatsApp.</p>
+                <p>تصفح منتجات البائعين وتواصل واطلب مباشرة عبر WhatsApp الخاص بكل تاجر.</p>
                 <div class="hero-actions">
                     <button class="btn btn-primary" id="startShopping">🛍️ ابدأ التسوق</button>
                     <button class="btn" id="heroLogin">🔐 تسجيل الدخول</button>
@@ -237,7 +234,7 @@
         <section id="storeSection">
             <div class="section-title">
                 <div>
-                    <h2>🛍️ المنتجات</h2>
+                    <h2>🛍️ المنتجات المعروضة</h2>
                     <span class="result-count" id="resultCount">جاري التحميل...</span>
                 </div>
             </div>
@@ -304,42 +301,6 @@
     </div>
 </div>
 
-<!-- Cart Modal -->
-<div class="modal" id="cartModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <h3>🛒 سلة المشتريات</h3>
-            <button class="close" data-close="cartModal">×</button>
-        </div>
-        <div class="modal-content">
-            <div id="cartItems" class="cart-list"></div>
-            <div class="cart-total">
-                <span>المجموع</span>
-                <strong class="total-value" id="cartTotal">0 دج</strong>
-            </div>
-            <form id="orderForm">
-                <div class="form-group">
-                    <label for="customerName">الاسم الكامل</label>
-                    <input class="input" id="customerName" required placeholder="اسمك الكامل">
-                </div>
-                <div class="form-group">
-                    <label for="customerPhone">رقم الهاتف</label>
-                    <input class="input" id="customerPhone" required inputmode="tel" placeholder="0550123456">
-                </div>
-                <div class="form-group">
-                    <label for="wilaya">الولاية</label>
-                    <select id="wilaya" required><option value="">اختر الولاية</option></select>
-                </div>
-                <div class="form-group">
-                    <label for="customerAddress">العنوان</label>
-                    <textarea id="customerAddress" rows="3" required placeholder="البلدية، الحي، رقم المنزل..."></textarea>
-                </div>
-                <button class="btn btn-success" type="submit" style="width:100%;">📱 إرسال الطلب عبر WhatsApp</button>
-            </form>
-        </div>
-    </div>
-</div>
-
 <!-- Admin Modal -->
 <div class="modal" id="adminModal">
     <div class="modal-box">
@@ -348,18 +309,22 @@
             <button class="close" data-close="adminModal">×</button>
         </div>
         <div class="modal-content">
-            <h4 style="margin-bottom:15px;">➕ إضافة منتج (حتى 5 صور من هاتفك)</h4>
+            <h4 style="margin-bottom:15px;">➕ إضافة منتج جديد</h4>
             <form id="productForm">
                 <div class="form-group">
                     <label for="productTitle">اسم المنتج</label>
-                    <input class="input" id="productTitle" required placeholder="مثال: قميص رياضي">
+                    <input class="input" id="productTitle" required placeholder="مثال: حذاء رياضي">
                 </div>
                 <div class="form-group">
                     <label for="productPrice">السعر بالدينار</label>
-                    <input class="input" id="productPrice" type="number" min="1" required placeholder="1200">
+                    <input class="input" id="productPrice" type="number" min="1" required placeholder="2500">
                 </div>
                 <div class="form-group">
-                    <label for="productImagesFile">اختر الصور (حدد 5 صور أو أكثر من هاتفك)</label>
+                    <label for="productWhatsapp" style="color: #fff;">رقم الواتساب الخاص بالتاجر</label>
+                    <input type="text" id="productWhatsapp" placeholder="مثال: 213555xxxxxx" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="productImagesFile">صور المنتج (يمكنك اختيار عدة صور)</label>
                     <input class="input" id="productImagesFile" type="file" accept="image/*" multiple required>
                 </div>
                 <button class="btn btn-primary" type="submit" style="width:100%;">📦 رفع الصور ونشر المنتج</button>
@@ -375,26 +340,15 @@
 
 const SUPABASE_URL = "https://lvthnzfubbrhyfnwqaxs.supabase.co";
 const SUPABASE_KEY = "sb_publishable_dxFosZXqkQfgc0qexLu0jw_FJ8xLY_G";
-const BUSINESS_WHATSAPP = "213600000000";
 
 const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 const state = {
     products: [],
-    cart: [],
     currentUser: null,
     role: "customer",
     authMode: "login"
 };
-
-const WILAYAS = [
-    "01. أدرار", "02. الشلف", "03. الأغواط", "04. أم البواقي", "05. باتنة", "06. بجاية", "07. بسكرة", "08. بشار", "09. البليدة", "10. البويرة",
-    "11. تمنراست", "12. تبسة", "13. تلمسان", "14. تيارت", "15. تيزي وزو", "16. الجزائر", "17. الجلفة", "18. جيجل", "19. سطيف", "20. سعيدة",
-    "21. سكيكدة", "22. سيدي بلعباس", "23. عنابة", "24. قالمة", "25. قسنطينة", "26. المدية", "27. مستغانم", "28. المسيلة", "29. معسكر", "30. ورقلة",
-    "31. وهران", "32. البيض", "33. إليزي", "34. برج بوعريريج", "35. بومرداس", "36. الطارف", "37. تندوف", "38. تيسمسيلت", "39. الوادي", "40. خنشلة",
-    "41. سوق أهراس", "42. تيبازة", "43. ميلة", "44. عين الدفلى", "45. النعامة", "46. عين تموشنت", "47. غرداية", "48. غليزان",
-    "49. تيميمون", "50. برج باجي مختار", "51. أولاد جلال", "52. بني عباس", "53. إن صالح", "54. إن قزام", "55. تقرت", "56. جانت", "57. المغير", "58. المنيعة"
-];
 
 const $ = sel => document.querySelector(sel);
 
@@ -409,17 +363,6 @@ function toast(message, type = "success") {
 function showModal(modal) { if(modal) modal.classList.add("show"); }
 function closeModal(modal) { if(modal) modal.classList.remove("show"); }
 
-const wilayaSelect = $("#wilaya");
-if(wilayaSelect) {
-    WILAYAS.forEach(w => {
-        const opt = document.createElement("option");
-        opt.value = w;
-        opt.textContent = w;
-        wilayaSelect.appendChild(opt);
-    });
-}
-
-$("#cartBtn").addEventListener("click", () => showModal($("#cartModal")));
 $("#loginBtn").addEventListener("click", () => showModal($("#authModal")));
 $("#heroLogin").addEventListener("click", () => showModal($("#authModal")));
 $("#startShopping").addEventListener("click", () => window.scrollTo({top: 600, behavior: 'smooth'}));
@@ -502,11 +445,11 @@ $("#logoutBtn").addEventListener("click", async () => {
 
 async function fetchProducts() {
     if(!supabaseClient) {
-        state.products = [{ id: 1, title: "منتج تجريبي", price: 1500, img: "https://placehold.co/400" }];
+        state.products = [{ id: 1, title: "منتج تجريبي", price: 1500, img: "https://placehold.co/400", whatsapp: "213555000000" }];
         renderProducts();
         return;
     }
-    const { data, error } = await supabaseClient.from("market_products").select("*").order("id", { ascending: false });
+    const { data, error } = await supabaseClient.from("products").select("*").order("id", { ascending: false });
     if(!error && data) {
         state.products = data;
         renderProducts();
@@ -523,9 +466,11 @@ function renderProducts() {
     }
 
     state.products.forEach(p => {
+        // دعم الصور المتعددة أو المفردة بناءً على تصميمك السابق
         let imagesList = [];
-        if(p.img) {
-            imagesList = p.img.includes(",") ? p.img.split(",") : [p.img];
+        const rawImg = p.img || p.image_url;
+        if(rawImg) {
+            imagesList = rawImg.includes(",") ? rawImg.split(",") : [rawImg];
         } else {
             imagesList = ["https://placehold.co/400"];
         }
@@ -547,17 +492,30 @@ function renderProducts() {
             deleteBtnHtml = `<button class="btn btn-danger" style="width:100%; margin-top:8px; padding:6px; font-size:13px;" onclick="deleteProduct('${p.id}')">🗑️ حذف المنتج</button>`;
         }
 
+        // رابط الواتساب المباشر للتاجر صاحب هذا المنتج
+        const vendorWhatsapp = p.whatsapp || "213600000000";
+        const whatsappMsg = encodeURIComponent(`السلام عليكم، أهتم بشراء هذا المنتج: ${p.title} بسعر ${p.price} دج`);
+        const whatsappLink = `https://wa.me/${vendorWhatsapp}?text=${whatsappMsg}`;
+
         card.innerHTML = `
-            <div class="product-image">
-                <img src="${imagesList[0].trim()}" alt="${p.title}" class="main-prod-img" loading="lazy">
-            </div>
-            ${thumbsHtml}
-            <div class="product-body">
-                <h3 class="product-title">${p.title}</h3>
-                <div class="product-footer">
-                    <span class="price">${p.price} دج</span>
-                    <button class="add-cart" onclick="addToCart('${p.id}')">أضف للسلة</button>
+            <div>
+                <div class="product-image">
+                    <img src="${imagesList[0].trim()}" alt="${p.title}" class="main-prod-img" loading="lazy">
                 </div>
+                ${thumbsHtml}
+                <div class="product-body">
+                    <h3 class="product-title">${p.title}</h3>
+                    <div class="product-footer">
+                        <div class="price-row">
+                            <span class="price">${p.price} دج</span>
+                        </div>
+                        <a href="${whatsappLink}" target="_blank" class="btn-whatsapp-order">
+                            📱 اطلب عبر واتساب التاجر
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div style="padding: 0 16px 16px 16px;">
                 ${deleteBtnHtml}
             </div>
         `;
@@ -578,7 +536,7 @@ window.deleteProduct = async function(id) {
     if(!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
     if(!supabaseClient) return;
 
-    const { error } = await supabaseClient.from("market_products").delete().eq("id", id);
+    const { error } = await supabaseClient.from("products").delete().eq("id", id);
     if(error) {
         toast("خطأ أثناء الحذف: " + error.message, "error");
     } else {
@@ -587,101 +545,19 @@ window.deleteProduct = async function(id) {
     }
 };
 
-window.addToCart = function(id) {
-    const product = state.products.find(p => String(p.id) === String(id));
-    if(!product) return;
-    
-    let firstImg = product.img;
-    if(firstImg && firstImg.includes(",")) {
-        firstImg = firstImg.split(",")[0].trim();
-    }
-
-    const cartItemData = { ...product, img: firstImg };
-    const existing = state.cart.find(item => String(item.id) === String(id));
-    if(existing) {
-        existing.qty += 1;
-    } else {
-        state.cart.push({ ...cartItemData, qty: 1 });
-    }
-    updateCartUI();
-    toast("تمت إضافة المنتج إلى السلة 🛒");
-};
-
-function updateCartUI() {
-    const list = $("#cartItems");
-    list.innerHTML = "";
-    let total = 0;
-    let count = 0;
-
-    state.cart.forEach(item => {
-        total += item.price * item.qty;
-        count += item.qty;
-        const img = item.img ? item.img : "https://placehold.co/400";
-        
-        const div = document.createElement("div");
-        div.className = "cart-item";
-        div.innerHTML = `
-            <img src="${img}" class="cart-item-image">
-            <div>
-                <div style="font-weight:800; font-size:14px;">${item.title}</div>
-                <div style="color:#34d399; font-size:13px;">${item.price} دج × ${item.qty}</div>
-            </div>
-            <button onclick="removeFromCart('${item.id}')" style="background:none; border:none; color:#fca5a5; cursor:pointer;">حذف</button>
-        `;
-        list.appendChild(div);
-    });
-
-    $("#cartTotal").textContent = total + " دج";
-    const badge = $("#cartCount");
-    badge.textContent = count;
-    badge.classList.toggle("hidden", count === 0);
-}
-
-window.removeFromCart = function(id) {
-    state.cart = state.cart.filter(i => String(i.id) !== String(id));
-    updateCartUI();
-};
-
-$("#orderForm").addEventListener("submit", e => {
-    e.preventDefault();
-    if(state.cart.length === 0) return toast("السلة فارغة!", "warning");
-    
-    const name = $("#customerName").value;
-    const phone = $("#customerPhone").value;
-    const wilaya = $("#wilaya").value;
-    const address = $("#customerAddress").value;
-    
-    let text = `*طلب جديد عبر المتجر* 🛒%0A%0A`;
-    text += `👤 *الاسم:* ${name}%0A`;
-    text += `📞 *الهاتف:* ${phone}%0A`;
-    text += `📍 *الولاية:* ${wilaya}%0A`;
-    text += `🏠 *العنوان:* ${address}%0A%0A`;
-    text += `📦 *المنتجات:*%0A`;
-    
-    let total = 0;
-    state.cart.forEach(item => {
-        text += `- ${item.title} (الكمية: ${item.qty}) - ${item.price * item.qty} دج%0A`;
-        total += item.price * item.qty;
-    });
-    
-    text += `%0A💰 *المجموع الإجمالي:* ${total} دج`;
-    
-    const url = `https://wa.me/${BUSINESS_WHATSAPP}?text=${text}`;
-    window.open(url, '_blank');
-});
-
 $("#productForm").addEventListener("submit", async e => {
     e.preventDefault();
     if(!supabaseClient) return toast("Supabase غير متصل", "error");
     
     const title = $("#productTitle").value;
     const price = Number($("#productPrice").value);
+    const whatsappNumber = $("#productWhatsapp").value.trim();
     const fileInput = $("#productImagesFile");
     const files = fileInput.files;
 
     if(files.length === 0) return toast("يرجى اختيار صورة واحدة على الأقل", "warning");
 
-    toast("جاري رفع الصور، يرجى الانتظار...", "warning");
+    toast("جاري رفع الصور ونشر المنتج...", "warning");
 
     try {
         let uploadedUrls = [];
@@ -692,7 +568,6 @@ $("#productForm").addEventListener("submit", async e => {
             const fileName = `${Date.now()}_${i}.${fileExt}`;
             const filePath = `public/${fileName}`;
 
-            // تم ربطه بـ 'products' بدقة هنا
             const { error: uploadError } = await supabaseClient.storage
                 .from('products')
                 .upload(filePath, file);
@@ -708,13 +583,21 @@ $("#productForm").addEventListener("submit", async e => {
 
         const imagesString = uploadedUrls.join(",");
 
-        const { error: insertError } = await supabaseClient.from("market_products").insert([
-            { title: title, price: price, img: imagesString, user_id: state.currentUser ? state.currentUser.id : null }
+        // حفظ المنتج مع رقم واتساب التاجر الخاص به
+        const { error: insertError } = await supabaseClient.from("products").insert([
+            { 
+                title: title, 
+                price: price, 
+                img: imagesString, 
+                image_url: uploadedUrls[0],
+                whatsapp: whatsappNumber,
+                user_id: state.currentUser ? state.currentUser.id : null 
+            }
         ]);
 
         if(insertError) throw insertError;
 
-        toast("تم نشر المنتج مع الصور بنجاح ✅");
+        toast("تم نشر المنتج برقم الواتساب الخاص بك بنجاح ✅");
         closeModal($("#adminModal"));
         $("#productForm").reset();
         fetchProducts();
