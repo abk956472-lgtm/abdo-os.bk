@@ -803,7 +803,6 @@
 "use strict";
 
 const SUPABASE_URL = "https://lvthnzfubbrhyfnwqaxs.supabase.co";
-// تم تصحيح المفتاح ليتوافق مع نظام Supabase الحديث (Publishable Key)
 const SUPABASE_KEY = "sb_publishable_dxFosZXqkQfgc0qexLu0jw_FJ8xLY_G";
 const BUSINESS_WHATSAPP = "213600000000";
 
@@ -908,16 +907,23 @@ async function checkUserSession() {
         state.role = session.user.user_metadata?.role || "customer";
         $("#loginBtn").classList.add("hidden");
         $("#logoutBtn").classList.remove("hidden");
-        if(state.role === "vendor") $("#adminBtn").classList.remove("hidden");
+        if(state.role === "vendor") {
+            $("#adminBtn").classList.remove("hidden");
+        } else {
+            $("#adminBtn").classList.add("hidden");
+        }
+    } else {
+        state.currentUser = null;
+        state.role = "customer";
+        $("#loginBtn").classList.remove("hidden");
+        $("#logoutBtn").classList.add("hidden");
+        $("#adminBtn").classList.add("hidden");
     }
 }
 
 $("#logoutBtn").addEventListener("click", async () => {
     if(supabaseClient) await supabaseClient.auth.signOut();
-    state.currentUser = null;
-    $("#loginBtn").classList.remove("hidden");
-    $("#logoutBtn").classList.add("hidden");
-    $("#adminBtn").classList.add("hidden");
+    checkUserSession();
     toast("تم تسجيل الخروج 👋");
 });
 
