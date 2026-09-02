@@ -338,30 +338,6 @@
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
         }
 
-        .gallery {
-            display: flex;
-            gap: 5px;
-            padding: 7px;
-            overflow-x: auto;
-            background: #0b1220;
-        }
-
-        .gallery img {
-            width: 48px;
-            height: 48px;
-            flex: 0 0 48px;
-            object-fit: cover;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            opacity: .65;
-        }
-
-        .gallery img:hover, .gallery img.active {
-            opacity: 1;
-            border-color: var(--primary);
-        }
-
         .empty {
             text-align: center;
             padding: 70px 20px;
@@ -529,22 +505,6 @@
 
         .admin-product img { width: 55px; height: 55px; border-radius: 10px; object-fit: cover; }
 
-        .lightbox {
-            position: fixed;
-            inset: 0;
-            z-index: 2000;
-            display: none;
-            place-items: center;
-            padding: 20px;
-            background: rgba(0,0,0,.9);
-        }
-
-        .lightbox.show { display: grid; }
-        .lightbox img { max-width: min(1000px, 95vw); max-height: 85vh; object-fit: contain; border-radius: 14px; }
-        .lightbox-close {
-            position: fixed; top: 20px; left: 20px; width: 45px; height: 45px; border: 0; border-radius: 50%; background: rgba(255,255,255,.1); color: white; font-size: 24px;
-        }
-
         .toast-container {
             position: fixed; left: 18px; bottom: 18px; z-index: 3000; display: flex; flex-direction: column; gap: 9px;
         }
@@ -642,6 +602,7 @@
     </div>
 </footer>
 
+<!-- AUTH MODAL -->
 <div class="modal" id="authModal">
     <div class="modal-box">
         <div class="modal-header">
@@ -677,6 +638,7 @@
     </div>
 </div>
 
+<!-- CART MODAL -->
 <div class="modal" id="cartModal">
     <div class="modal-box">
         <div class="modal-header">
@@ -712,6 +674,7 @@
     </div>
 </div>
 
+<!-- ADMIN MODAL -->
 <div class="modal" id="adminModal">
     <div class="modal-box">
         <div class="modal-header">
@@ -740,11 +703,6 @@
             <div id="myProducts"><div class="loading"><div class="spinner"></div></div></div>
         </div>
     </div>
-</div>
-
-<div class="lightbox" id="lightbox">
-    <button class="lightbox-close" id="lightboxClose">×</button>
-    <img id="lightboxImage" src="" alt="صورة المنتج">
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -797,7 +755,6 @@ function initWilayas() {
     });
 }
 
-// أزرار ونوافذ التحكم
 $("#loginBtn").addEventListener("click", () => { setAuthMode("login"); showModal($("#authModal")); });
 $("#heroLogin").addEventListener("click", () => { setAuthMode("login"); showModal($("#authModal")); });
 $("#startShopping").addEventListener("click", () => { window.scrollTo({ top: 600, behavior: 'smooth' }); });
@@ -824,7 +781,6 @@ function setAuthMode(mode) {
 $("#loginTab").addEventListener("click", () => setAuthMode("login"));
 $("#signupTab").addEventListener("click", () => setAuthMode("signup"));
 
-// نموذج تسجيل الدخول / إنشاء الحساب المصحح
 $("#authForm").addEventListener("submit", async e => {
     e.preventDefault();
     if (!supabaseClient) { toast("Supabase غير متصل", "error"); return; }
@@ -885,7 +841,6 @@ $("#logoutBtn").addEventListener("click", async () => {
     toast("تم تسجيل الخروج 👋");
 });
 
-// جلب وعرض المنتجات
 async function fetchProducts() {
     if (!supabaseClient) return;
     const { data, error } = await supabaseClient.from("market_products").select("*").order("created_at", { ascending: false });
@@ -927,7 +882,6 @@ function renderProducts() {
 
 $("#searchInput").addEventListener("input", renderProducts);
 
-// إدارة السلة
 function addToCart(id) {
     const product = state.products.find(p => String(p.id) === String(id));
     if (!product) return;
@@ -973,7 +927,6 @@ function removeFromCart(idx) {
     renderCart();
 }
 
-// إرسال الطلب عبر الواتساب
 $("#orderForm").addEventListener("submit", e => {
     e.preventDefault();
     if (state.cart.length === 0) { toast("السلة فارغة", "error"); return; }
@@ -990,7 +943,6 @@ $("#orderForm").addEventListener("submit", e => {
     window.open(`https://wa.me/${BUSINESS_WHATSAPP}?text=${text}`, '_blank');
 });
 
-// رفع المنتجات للبائع
 $("#productForm").addEventListener("submit", async e => {
     e.preventDefault();
     if (!state.currentUser || state.role !== "vendor") { toast("يجب تسجيل الدخول كبائع أولاً", "error"); return; }
