@@ -542,7 +542,6 @@ function renderProducts() {
             thumbsHtml += `</div>`;
         }
 
-        // زر الحذف يظهر فقط إذا كان المستخدم الحالي هو البائع صاحب المنتج أو لديه صلاحية البائع
         let deleteBtnHtml = "";
         if(state.role === "vendor") {
             deleteBtnHtml = `<button class="btn btn-danger" style="width:100%; margin-top:8px; padding:6px; font-size:13px;" onclick="deleteProduct('${p.id}')">🗑️ حذف المنتج</button>`;
@@ -693,6 +692,7 @@ $("#productForm").addEventListener("submit", async e => {
             const fileName = `${Date.now()}_${i}.${fileExt}`;
             const filePath = `public/${fileName}`;
 
+            // تم ربطه بـ 'products' بدقة هنا
             const { error: uploadError } = await supabaseClient.storage
                 .from('products')
                 .upload(filePath, file);
