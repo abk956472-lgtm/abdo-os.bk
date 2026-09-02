@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abdo Store - منصة التجارة الإلكترونية بالجزائر</title>
-    <!-- مكتبة Supabase للاتصال بقاعدة البيانات الحقيقية -->
+    <!-- مكتبة Supabase للاتصال بقاعدة البيانات والتخزين -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -111,11 +111,43 @@
             transform: translateY(-5px);
         }
 
-        .product-img {
+        .product-img-container {
+            position: relative;
             width: 100%;
             height: 180px;
-            object-fit: cover;
             background-color: #334155;
+            cursor: pointer;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* تنسيق الصور المصغرة داخل بطاقة المنتج */
+        .product-thumbs {
+            display: flex;
+            gap: 5px;
+            padding: 5px 10px;
+            background-color: #1a2333;
+            overflow-x: auto;
+        }
+
+        .thumb-img {
+            width: 35px;
+            height: 35px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #475569;
+            opacity: 0.7;
+            transition: 0.2s;
+        }
+
+        .thumb-img:hover, .thumb-img.active {
+            opacity: 1;
+            border-color: var(--primary-color);
         }
 
         .product-info {
@@ -153,13 +185,13 @@
         }
 
         .modal {
-            display: none;
+            display: flex;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(15, 23, 42, 0.95);
             z-index: 200;
             justify-content: center;
             align-items: center;
@@ -168,18 +200,47 @@
         .modal-content {
             background-color: var(--card-bg);
             width: 90%;
-            max-width: 500px;
+            max-width: 480px;
             border-radius: 12px;
-            padding: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
             max-height: 90vh;
             overflow-y: auto;
         }
 
-        .close-btn {
-            float: left;
-            font-size: 1.5rem;
+        /* نافذة تكبير الصورة (Lightbox) */
+        .zoom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .zoom-modal img {
+            max-width: 90%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 2px solid #334155;
+        }
+
+        .zoom-close {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            font-size: 2.5rem;
+            color: white;
             cursor: pointer;
-            color: #94a3b8;
+            background: none;
+            border: none;
         }
 
         .cart-item, .admin-item {
@@ -249,25 +310,30 @@
 
     <header>
         <div class="logo">📦 Abdo Store - الجزائر</div>
-        <div class="nav-btns" id="navButtons">
-            <!-- سيتم التحكم في عرض الأزرار ديناميكياً هنا -->
-        </div>
+        <div class="nav-btns" id="navButtons"></div>
     </header>
 
-    <div class="container">
+    <div class="container" id="mainContent" style="display: none;">
         <h2 class="section-title">المنتجات المتوفرة</h2>
         <div class="products-grid" id="productsGrid"></div>
     </div>
 
-    <!-- نافذة تسجيل الدخول / إنشاء حساب -->
+    <!-- نافذة تكبير الصورة (Lightbox) -->
+    <div class="zoom-modal" id="zoomModal" onclick="closeZoom()">
+        <button class="zoom-close">&times;</button>
+        <img id="zoomedImg" src="" alt="صورة مكبرة">
+        <p style="color: #94a3b8; margin-top: 15px; font-size: 0.9rem;">انقر في أي مكان للإغلاق</p>
+    </div>
+
+    <!-- نافذة تسجيل الدخول الإجبارية -->
     <div class="modal" id="authModal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeAuthModal()">&times;</span>
-            <h3 id="authTitle">🔐 تسجيل الدخول أو حساب جديد</h3>
+            <h3 style="text-align: center; margin-bottom: 10px;">🔐 مرحباً بك في Abdo Store</h3>
+            <p style="text-align: center; font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px;">يجب تسجيل الدخول أو إنشاء حساب للمتابعة كـ (تاجر أو زبون)</p>
             
-            <form id="authForm" onsubmit="handleAuth(event)" style="margin-top: 15px;">
+            <form id="authForm" onsubmit="handleAuth(event)">
                 <div class="form-group" id="roleGroup">
-                    <label>اختر نوع الحساب:</label>
+                    <label>نوع الحساب:</label>
                     <div class="role-selector">
                         <label><input type="radio" name="userRole" value="customer" checked> زبون 🛒</label>
                         <label><input type="radio" name="userRole" value="vendor"> تاجر ⚙️</label>
@@ -278,7 +344,7 @@
                     <input type="email" id="authEmail" required placeholder="name@example.com">
                 </div>
                 <div class="form-group">
-                    <label>كلمة المرور (6 أحرف على الأقل):</label>
+                    <label>كلمة المرور:</label>
                     <input type="password" id="authPassword" required placeholder="••••••••">
                 </div>
                 <button type="submit" class="submit-btn">🚀 دخول / تسجيل</button>
@@ -286,10 +352,10 @@
         </div>
     </div>
 
-    <!-- نافذة سلة التسوق -->
-    <div class="modal" id="cartModal">
+    <!-- نافذة السلة -->
+    <div class="modal" id="cartModal" style="display: none; background-color: rgba(0, 0, 0, 0.7);">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeCart()">&times;</span>
+            <span style="float: left; font-size: 1.5rem; cursor: pointer; color: #94a3b8;" onclick="closeCart()">&times;</span>
             <h3>🛒 سلة التسوق</h3>
             <div id="cartItemsList" style="margin-top: 15px;"></div>
             <h4 style="margin-top: 15px; text-align: left;">المجموع: <span id="totalPrice" style="color: var(--accent-color);">0</span> دج</h4>
@@ -311,39 +377,40 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>البلدية / العنوان:</label>
-                    <input type="text" id="custAddress" required placeholder="اسم البلدية أو الحي">
+                    <label>العنوان / البلدية:</label>
+                    <input type="text" id="custAddress" required placeholder="اسم الحي أو البلدية">
                 </div>
-                <button type="submit" class="submit-btn">📲 تأكيد الطلب عبر واتساب</button>
+                <button type="submit" class="submit-btn" style="background-color: var(--primary-color);">📲 تأكيد الطلب عبر واتساب</button>
             </form>
         </div>
     </div>
 
-    <!-- نافذة مساحة التاجر -->
-    <div class="modal" id="adminModal">
+    <!-- نافذة لوحة التاجر -->
+    <div class="modal" id="adminModal" style="display: none; background-color: rgba(0, 0, 0, 0.7);">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeAdmin()">&times;</span>
-            <h3>⚙️ لوحة تحكم التاجر المستقلة</h3>
+            <span style="float: left; font-size: 1.5rem; cursor: pointer; color: #94a3b8;" onclick="closeAdmin()">&times;</span>
+            <h3>⚙️ لوحة تحكم التاجر</h3>
             <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 5px;" id="vendorEmailDisplay"></p>
             
             <form id="addProductForm" onsubmit="addNewProduct(event)" style="margin-top: 15px;">
                 <div class="form-group">
                     <label>اسم المنتج:</label>
-                    <input type="text" id="newTitle" required placeholder="مثال: قميص صيفي فاخر">
+                    <input type="text" id="newTitle" required placeholder="مثال: حذاء رياضي فاخر">
                 </div>
                 <div class="form-group">
                     <label>السعر (دج):</label>
-                    <input type="number" id="newPrice" required placeholder="مثال: 3000">
+                    <input type="number" id="newPrice" required placeholder="مثال: 4500">
                 </div>
                 <div class="form-group">
-                    <label>رابط الصورة (URL):</label>
-                    <input type="url" id="newImg" required placeholder="ضع رابط صورة المنتج هنا">
+                    <label>اختر صور المنتج (من 1 إلى 5 صور من الهاتف):</label>
+                    <input type="file" id="productImagesInput" accept="image/*" multiple max="5" style="padding: 8px; background: #0f172a;">
+                    <small style="color: #94a3b8; display: block; margin-top: 4px;">يمكنك اختيار عدة صور دفعة واحدة من معرض الهاتف.</small>
                 </div>
-                <button type="submit" class="submit-btn" style="background-color: var(--primary-color);">➕ إضافة المنتج للمتجر العام</button>
+                <button type="submit" id="uploadBtn" class="submit-btn" style="background-color: var(--primary-color);">➕ رفع الصور وإضافة المنتج</button>
             </form>
             <hr style="margin: 20px 0; border-color: #334155;">
-            <h4>منتجاتك الخاصة (إدارة / حذف):</h4>
-            <div id="adminProductsList" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
+            <h4>منتجاتك الخاصة:</h4>
+            <div id="adminProductsList" style="margin-top: 10px; max-height: 180px; overflow-y: auto;"></div>
         </div>
     </div>
 
@@ -381,10 +448,13 @@
                 if (session && session.user) {
                     currentUser = session.user;
                     userRole = currentUser.user_metadata?.role || 'customer';
+                    onLoginSuccess();
+                } else {
+                    document.getElementById('authModal').style.display = 'flex';
                 }
+            } else {
+                document.getElementById('authModal').style.display = 'flex';
             }
-            updateNavUI();
-            fetchProducts();
         }
 
         async function fetchProducts() {
@@ -408,7 +478,7 @@
 
         function loadDefaultProducts() {
             products = [
-                { id: 1, title: "قميص شبابي عصري (معاينة محلية)", price: 2800, img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80", vendor: "متجر المنصة" }
+                { id: 1, title: "قميص شبابي عصري", price: 2800, images: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80"], vendor: "متجر المنصة" }
             ];
             renderProducts();
         }
@@ -416,20 +486,65 @@
         function renderProducts() {
             const grid = document.getElementById('productsGrid');
             if(!grid) return;
-            grid.innerHTML = products.map(p => `
-                <div class="product-card">
-                    <img src="${p.img}" alt="${p.title}" class="product-img">
-                    <div class="product-info">
-                        <div class="vendor-tag">بواسطة: ${p.vendor || 'متجر معتمد'}</div>
-                        <div class="product-title">${p.title}</div>
-                        <div class="product-price">${p.price} دج</div>
-                        <button class="add-to-cart-btn" onclick="addToCart('${p.id}')">إضافة إلى السلة 🛒</button>
+            grid.innerHTML = products.map((p, index) => {
+                let imgList = p.images || (p.img ? [p.img] : ["https://via.placeholder.com/400"]);
+                let firstImg = imgList[0];
+
+                // بناء الصور المصغرة إذا وجد أكثر من صورة
+                let thumbsHTML = '';
+                if (imgList.length > 1) {
+                    thumbsHTML = `<div class="product-thumbs">` + imgList.map((imgUrl, imgIndex) => `
+                        <img src="${imgUrl}" class="thumb-img ${imgIndex === 0 ? 'active' : ''}" onclick="changeMainImage('${p.id}', '${imgUrl}', this)">
+                    `).join('') + `</div>`;
+                }
+
+                return `
+                    <div class="product-card">
+                        <div>
+                            <div class="product-img-container" onclick="openZoom('${firstImg}')">
+                                <img src="${firstImg}" alt="${p.title}" class="product-img" id="main-img-${p.id}">
+                            </div>
+                            ${thumbsHTML}
+                        </div>
+                        <div class="product-info">
+                            <div class="vendor-tag">بواسطة: ${p.vendor || 'متجر معتمد'}</div>
+                            <div class="product-title">${p.title}</div>
+                            <div class="product-price">${p.price} دج</div>
+                            <button class="add-to-cart-btn" onclick="addToCart('${p.id}')">إضافة إلى السلة 🛒</button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             if (currentUser && userRole === 'vendor') {
                 renderAdminProductsList();
             }
+        }
+
+        // دالة تغيير الصورة الرئيسية عند الضغط على الصورة المصغرة
+        function changeMainImage(productId, imgUrl, thumbElement) {
+            const mainImg = document.getElementById(`main-img-${productId}`);
+            if (mainImg) {
+                mainImg.src = imgUrl;
+                // تحديث الصورة الرئيسية القابلة للتكبير بالضغط عليها
+                const container = mainImg.parentElement;
+                container.setAttribute('onclick', `openZoom('${imgUrl}')`);
+            }
+            // تبديل حدود التحديد (Active) للصورة المصغرة
+            const thumbsContainer = thumbElement.parentElement;
+            Array.from(thumbsContainer.children).forEach(t => t.classList.remove('active'));
+            thumbElement.classList.add('active');
+        }
+
+        // دوال نافذة تكبير الصورة (Zoom)
+        function openZoom(imgUrl) {
+            const modal = document.getElementById('zoomModal');
+            const zoomedImg = document.getElementById('zoomedImg');
+            zoomedImg.src = imgUrl;
+            modal.style.display = 'flex';
+        }
+
+        function closeZoom() {
+            document.getElementById('zoomModal').style.display = 'none';
         }
 
         function renderWilayas() {
@@ -447,7 +562,7 @@
         async function handleAuth(e) {
             e.preventDefault();
             if (!supabaseClient) {
-                alert("لم يتم ربط قاعدة البيانات بعد.");
+                alert("لم يتم ربط قاعدة البيانات.");
                 return;
             }
             const email = document.getElementById('authEmail').value.trim();
@@ -466,45 +581,40 @@
                     alert("خطأ: " + signupRes.error.message);
                     return;
                 }
-                alert("تم إنشاء الحساب بنجاح وتسجيل دخولك!");
+                alert("تم إنشاء الحساب وتسجيل دخولك بنجاح!");
                 currentUser = signupRes.data.user;
             } else {
-                alert("مرحباً بك، تم تسجيل الدخول بنجاح!");
+                alert("مرحباً بك مجدداً!");
                 currentUser = data.user;
             }
 
             userRole = selectedRole;
+            onLoginSuccess();
+        }
+
+        function onLoginSuccess() {
+            document.getElementById('authModal').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
             updateNavUI();
-            closeAuthModal();
             fetchProducts();
         }
 
         function updateNavUI() {
             const nav = document.getElementById('navButtons');
-            if (!nav) return;
+            if (!nav || !currentUser) return;
 
-            if (!currentUser) {
-                // في حال لم يتم تسجيل الدخول (عرض زر تسجيل الدخول والسلة فقط)
+            if (userRole === 'vendor') {
                 nav.innerHTML = `
-                    <button class="btn btn-auth" onclick="openAuthModal()">👤 تسجيل الدخول / حساب جديد</button>
+                    <button class="btn btn-admin" onclick="openAdmin()">⚙️ لوحة التاجر</button>
+                    <button class="btn btn-auth" onclick="logout()">خروج 🚪</button>
                     <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">${cart.length}</span></button>
                 `;
             } else {
-                if (userRole === 'vendor') {
-                    // إذا كان مسجلاً كتاجر (إخفاء زر تسجيل الدخول ووضعه مكانه زر لوحة التاجر)
-                    nav.innerHTML = `
-                        <button class="btn btn-admin" onclick="openAdmin()">⚙️ لوحة التاجر</button>
-                        <button class="btn btn-auth" onclick="logout()">خروج 🚪</button>
-                        <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">${cart.length}</span></button>
-                    `;
-                } else {
-                    // إذا كان مسجلاً كزبون
-                    nav.innerHTML = `
-                        <span style="font-size: 0.85rem; color: #10b981;">أهلاً بك</span>
-                        <button class="btn btn-auth" onclick="logout()">خروج 🚪</button>
-                        <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">${cart.length}</span></button>
-                    `;
-                }
+                nav.innerHTML = `
+                    <span style="font-size: 0.85rem; color: #10b981;">أهلاً بك</span>
+                    <button class="btn btn-auth" onclick="logout()">خروج 🚪</button>
+                    <button class="btn" onclick="openCart()">🛒 السلة <span class="cart-badge" id="cartCount">${cart.length}</span></button>
+                `;
             }
         }
 
@@ -512,8 +622,8 @@
             if(supabaseClient) await supabaseClient.auth.signOut();
             currentUser = null;
             userRole = 'customer';
-            updateNavUI();
-            fetchProducts();
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('authModal').style.display = 'flex';
         }
 
         async function addNewProduct(e) {
@@ -522,19 +632,65 @@
 
             const title = document.getElementById('newTitle').value;
             const price = Number(document.getElementById('newPrice').value);
-            const img = document.getElementById('newImg').value;
-            const vendorEmail = currentUser.email;
+            const fileInput = document.getElementById('productImagesInput');
+            const files = fileInput.files;
 
-            const { error } = await supabaseClient
-                .from('market_products')
-                .insert([{ title, price, img, vendor: vendorEmail }]);
+            if (files.length === 0) {
+                alert("الرجاء اختيار صورة واحدة على الأقل من الهاتف!");
+                return;
+            }
 
-            if (error) {
-                alert("فشل في إضافة المنتج: " + error.message);
-            } else {
-                alert("تم إضافة المنتج بنجاح!");
+            if (files.length > 5) {
+                alert("عذراً، الحد الأقصى هو 5 صور فقط!");
+                return;
+            }
+
+            const uploadBtn = document.getElementById('uploadBtn');
+            uploadBtn.textContent = "جاري رفع الصور...";
+            uploadBtn.disabled = true;
+
+            let uploadedImageUrls = [];
+
+            try {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${Date.now()}_${i}.${fileExt}`;
+                    const filePath = `${currentUser.id}/${fileName}`;
+
+                    const { error: uploadError } = await supabaseClient.storage
+                        .from('product-images')
+                        .upload(filePath, file);
+
+                    if (uploadError) throw uploadError;
+
+                    const { data: publicUrlData } = supabaseClient.storage
+                        .from('product-images')
+                        .getPublicUrl(filePath);
+
+                    uploadedImageUrls.push(publicUrlData.publicUrl);
+                }
+
+                const { error: dbError } = await supabaseClient
+                    .from('market_products')
+                    .insert([{ 
+                        title, 
+                        price, 
+                        images: uploadedImageUrls, 
+                        vendor: currentUser.email 
+                    }]);
+
+                if (dbError) throw dbError;
+
+                alert("تم رفع الصور وإضافة المنتج بنجاح! 🎉");
                 document.getElementById('addProductForm').reset();
                 fetchProducts();
+
+            } catch (err) {
+                alert("حدث خطأ أثناء الرفع: " + err.message);
+            } finally {
+                uploadBtn.textContent = "➕ رفع الصور وإضافة المنتج";
+                uploadBtn.disabled = false;
             }
         }
 
@@ -544,7 +700,7 @@
             const myProducts = products.filter(p => p.vendor === currentUser.email);
             
             if (myProducts.length === 0) {
-                list.innerHTML = "<p style='color: #94a3b8;'>ليس لديك منتجات مضافة حالياً.</p>";
+                list.innerHTML = "<p style='color: #94a3b8;'>ليس لديك منتجات مضافة.</p>";
                 return;
             }
             list.innerHTML = myProducts.map(p => `
@@ -556,15 +712,36 @@
         }
 
         async function deleteProduct(id) {
-            if(!supabaseClient) return;
-            if(!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
-            
-            const { error } = await supabaseClient.from('market_products').delete().eq('id', id);
-            if (error) {
-                alert("خطأ في الحذف: " + error.message);
-            } else {
-                alert("تم حذف المنتج بنجاح!");
+            if (!supabaseClient) return;
+            if (!confirm("هل أنت متأكد من حذف هذا المنتج؟ سيتم حذف صوره نهائياً.")) return;
+
+            try {
+                const productToDelete = products.find(p => String(p.id) === String(id));
+                
+                if (productToDelete && productToDelete.images && productToDelete.images.length > 0) {
+                    let pathsToRemove = [];
+                    productToDelete.images.forEach(url => {
+                        const marker = '/product-images/';
+                        const parts = url.split(marker);
+                        if (parts.length > 1) {
+                            pathsToRemove.push(parts[1]);
+                        }
+                    });
+
+                    if (pathsToRemove.length > 0) {
+                        await supabaseClient.storage
+                            .from('product-images')
+                            .remove(pathsToRemove);
+                    }
+                }
+
+                const { error } = await supabaseClient.from('market_products').delete().eq('id', id);
+                if (error) throw error;
+
+                alert("تم حذف المنتج وصوره بنجاح!");
                 fetchProducts();
+            } catch (err) {
+                alert("خطأ أثناء الحذف: " + err.message);
             }
         }
 
@@ -584,7 +761,7 @@
             if (!list) return;
 
             if (cart.length === 0) {
-                list.innerHTML = "<p style='color: #94a3b8;'>السلة فارغة حالياً.</p>";
+                list.innerHTML = "<p style='color: #94a3b8;'>السلة فارغة.</p>";
             } else {
                 list.innerHTML = cart.map((item, index) => `
                     <div class="cart-item">
@@ -603,8 +780,6 @@
             updateCartUI();
         }
 
-        function openAuthModal() { document.getElementById('authModal').style.display = 'flex'; }
-        function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
         function openCart() { document.getElementById('cartModal').style.display = 'flex'; }
         function closeCart() { document.getElementById('cartModal').style.display = 'none'; }
         function openAdmin() { 
@@ -633,7 +808,6 @@
             window.open(`https://wa.me/${myWhatsAppNumber}?text=${message}`, '_blank');
         }
 
-        // تشغيل التطبيق عند التحميل
         initApp();
     </script>
 </body>
