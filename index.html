@@ -131,7 +131,6 @@
         .product-image img { width: 100%; height: 100%; object-fit: cover; transition: .35s ease; cursor: pointer; }
         .product-card:hover .product-image img { transform: scale(1.04); }
 
-        /* معرض الصور المصغرة داخل الكارد */
         .thumb-gallery {
             display: flex; gap: 5px; padding: 8px; background: rgba(0,0,0,0.3); overflow-x: auto;
         }
@@ -145,7 +144,7 @@
             font-size: 17px; font-weight: 850; margin-bottom: 7px;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 54px;
         }
-        .product-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .product-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }
         .price { color: #34d399; font-size: 19px; font-weight: 950; white-space: nowrap; }
         .add-cart { flex: 1; padding: 10px; border-radius: 11px; border: 0; color: white; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
 
@@ -389,11 +388,12 @@ const state = {
 };
 
 const WILAYAS = [
-    "أدرار", "الشلف", "الأغواط", "أم البواقي", "باتنة", "بجاية", "بسكرة", "بشار", "البليدة", "البويرة",
-    "تمنراست", "تبسة", "تلمسان", "تيارت", "تيزي وزو", "الجزائر", "الجلفة", "جيجل", "سطيف", "سعيدة",
-    "سكيكدة", "سيدي بلعباس", "عنابة", "قالمة", "قسنطينة", "المدية", "مستغانم", "المسيلة", "معسكر", "ورقلة",
-    "وهران", "البيض", "إليزي", "برج بوعريريج", "بومرداس", "الطارف", "تندوف", "تيسمسيلت", "الوادي", "خنشلة",
-    "سوق أهراس", "تيبازة", "ميلة", "عين الدفلى", "النعامة", "عين تموشنت", "غرداية", "غليزان"
+    "01. أدرار", "02. الشلف", "03. الأغواط", "04. أم البواقي", "05. باتنة", "06. بجاية", "07. بسكرة", "08. بشار", "09. البليدة", "10. البويرة",
+    "11. تمنراست", "12. تبسة", "13. تلمسان", "14. تيارت", "15. تيزي وزو", "16. الجزائر", "17. الجلفة", "18. جيجل", "19. سطيف", "20. سعيدة",
+    "21. سكيكدة", "22. سيدي بلعباس", "23. عنابة", "24. قالمة", "25. قسنطينة", "26. المدية", "27. مستغانم", "28. المسيلة", "29. معسكر", "30. ورقلة",
+    "31. وهران", "32. البيض", "33. إليزي", "34. برج بوعريريج", "35. بومرداس", "36. الطارف", "37. تندوف", "38. تيسمسيلت", "39. الوادي", "40. خنشلة",
+    "41. سوق أهراس", "42. تيبازة", "43. ميلة", "44. عين الدفلى", "45. النعامة", "46. عين تموشنت", "47. غرداية", "48. غليزان",
+    "49. تيميمون", "50. برج باجي مختار", "51. أولاد جلال", "52. بني عباس", "53. إن صالح", "54. إن قزام", "55. تقرت", "56. جانت", "57. المغير", "58. المنيعة"
 ];
 
 const $ = sel => document.querySelector(sel);
@@ -491,6 +491,7 @@ async function checkUserSession() {
         $("#logoutBtn").classList.add("hidden");
         $("#adminBtn").classList.add("hidden");
     }
+    fetchProducts();
 }
 
 $("#logoutBtn").addEventListener("click", async () => {
@@ -522,7 +523,6 @@ function renderProducts() {
     }
 
     state.products.forEach(p => {
-        // التحقق مما إذا كانت الصور مخزنة كنص مفصول بـفاصلة أو رابط واحد
         let imagesList = [];
         if(p.img) {
             imagesList = p.img.includes(",") ? p.img.split(",") : [p.img];
@@ -542,6 +542,12 @@ function renderProducts() {
             thumbsHtml += `</div>`;
         }
 
+        // زر الحذف يظهر فقط إذا كان المستخدم الحالي هو البائع صاحب المنتج أو لديه صلاحية البائع
+        let deleteBtnHtml = "";
+        if(state.role === "vendor") {
+            deleteBtnHtml = `<button class="btn btn-danger" style="width:100%; margin-top:8px; padding:6px; font-size:13px;" onclick="deleteProduct('${p.id}')">🗑️ حذف المنتج</button>`;
+        }
+
         card.innerHTML = `
             <div class="product-image">
                 <img src="${imagesList[0].trim()}" alt="${p.title}" class="main-prod-img" loading="lazy">
@@ -553,6 +559,7 @@ function renderProducts() {
                     <span class="price">${p.price} دج</span>
                     <button class="add-cart" onclick="addToCart('${p.id}')">أضف للسلة</button>
                 </div>
+                ${deleteBtnHtml}
             </div>
         `;
         container.appendChild(card);
@@ -566,6 +573,19 @@ window.changeMainImage = function(thumbElement, imageUrl) {
     mainImg.src = imageUrl;
     card.querySelectorAll(".thumb-gallery img").forEach(img => img.classList.remove("active"));
     thumbElement.classList.add("active");
+};
+
+window.deleteProduct = async function(id) {
+    if(!confirm("هل أنت متأكد من حذف هذا المنتج؟")) return;
+    if(!supabaseClient) return;
+
+    const { error } = await supabaseClient.from("market_products").delete().eq("id", id);
+    if(error) {
+        toast("خطأ أثناء الحذف: " + error.message, "error");
+    } else {
+        toast("تم حذف المنتج بنجاح ✅");
+        fetchProducts();
+    }
 };
 
 window.addToCart = function(id) {
@@ -651,7 +671,6 @@ $("#orderForm").addEventListener("submit", e => {
     window.open(url, '_blank');
 });
 
-// رفع الصور من الهاتف وتخزينها في Supabase Storage
 $("#productForm").addEventListener("submit", async e => {
     e.preventDefault();
     if(!supabaseClient) return toast("Supabase غير متصل", "error");
@@ -706,7 +725,6 @@ $("#productForm").addEventListener("submit", async e => {
 });
 
 checkUserSession();
-fetchProducts();
 </script>
 
 </body>
