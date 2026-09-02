@@ -349,9 +349,9 @@
     </div>
 
     <script>
-        // إعدادات الاتصال بـ Supabase (بدون مفتاح - فارغ تماماً حالياً)
+        // إعدادات الاتصال بـ Supabase مع الرابط والمفتاح الخاص بك
         const SUPABASE_URL = 'https://lvthnzfubbrhyfnwqaxs.supabase.co';
-        const SUPABASE_KEY = ''; // ضع مفتاح الـ anon الخاص بك هنا لاحقاً بين علامتي التنصيص إن أردت ربطه
+        const SUPABASE_KEY = 'sb_publishable_dxFosZXqkQfgc0qexLu0jw_FJ8xLY_G';
         
         const supabaseClient = (SUPABASE_KEY && SUPABASE_KEY !== '') ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
@@ -382,7 +382,8 @@
                 return;
             }
             try {
-                const { data, error } = await supabaseClient.from('products').select('*');
+                // جلب المنتجات من الجدول الجديد market_products
+                const { data, error } = await supabaseClient.from('market_products').select('*');
                 if (error) {
                     loadDefaultProducts();
                 } else {
@@ -436,7 +437,7 @@
         async function handleAuth(e) {
             e.preventDefault();
             if (!supabaseClient) {
-                alert("لم يتم ربط قاعدة البيانات بعد. هذا وضع معاينة محلية.");
+                alert("لم يتم ربط قاعدة البيانات بعد.");
                 return;
             }
             const email = document.getElementById('authEmail').value;
@@ -503,8 +504,9 @@
             const img = document.getElementById('newImg').value;
             const vendorEmail = currentUser.email;
 
+            // الإضافة إلى الجدول الجديد market_products
             const { error } = await supabaseClient
-                .from('products')
+                .from('market_products')
                 .insert([{ title, price, img, vendor: vendorEmail }]);
 
             if (error) {
@@ -535,7 +537,8 @@
 
         async function deleteProduct(id) {
             if(!supabaseClient) return;
-            const { error } = await supabaseClient.from('products').delete().eq('id', id);
+            // الحذف من الجدول الجديد market_products
+            const { error } = await supabaseClient.from('market_products').delete().eq('id', id);
             if (error) {
                 alert("خطأ في الحذف: " + error.message);
             } else {
