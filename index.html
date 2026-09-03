@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0b1220">
     <meta name="description" content="Abdo Store - منصة التجارة الإلكترونية متعددة البائعين في الجزائر">
-    <title>Abdo Store | النسخة الاحترافية الشاملة 🇩🇿</title>
+    <title>Abdo Store | النسخة الاحترافية بالسلة 🇩🇿</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -47,7 +47,6 @@
         .hidden { display: none !important; }
         .container { width: min(1240px, calc(100% - 30px)); margin: auto; }
 
-        /* Top Announcement Marquee */
         .announcement-bar {
             background: linear-gradient(90deg, #2563eb, #7c3aed, #10b981);
             color: white; font-size: 13px; font-weight: 700; padding: 8px 0; text-align: center;
@@ -85,6 +84,10 @@
         .btn-danger { background: rgba(239,68,68,.12); color: #fca5a5; border-color: rgba(239,68,68,.2); }
         .btn-success { background: linear-gradient(135deg, #10b981, #059669); color: white; border-color: transparent; }
 
+        .cart-btn-badge {
+            background: var(--danger); color: white; font-size: 11px; padding: 2px 6px; border-radius: 20px; font-weight: 900; margin-right: 4px;
+        }
+
         .hero { padding: 60px 0 30px; }
         .hero-box {
             position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 32px; padding: 50px;
@@ -104,7 +107,6 @@
         .hero p { color: var(--muted); max-width: 650px; font-size: 17px; }
         .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
 
-        /* Categories Bar */
         .categories-scroll {
             display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; margin: 20px 0; scrollbar-width: none;
         }
@@ -167,12 +169,12 @@
         .price-row { display: flex; justify-content: space-between; align-items: center; }
         .price { color: #34d399; font-size: 20px; font-weight: 950; white-space: nowrap; }
         
-        .btn-whatsapp-order {
+        .btn-add-cart {
             width: 100%; padding: 11px; border-radius: 12px; border: 0; color: white; font-weight: 800;
-            background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; text-align: center;
-            box-shadow: 0 4px 15px rgba(16,185,129,.3);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; text-align: center;
+            box-shadow: 0 4px 15px rgba(59,130,246,.3); cursor: pointer;
         }
-        .btn-whatsapp-order:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn-add-cart:hover { opacity: 0.92; transform: translateY(-1px); }
 
         .empty { text-align: center; padding: 80px 20px; border: 1px dashed var(--border); border-radius: var(--radius); background: rgba(255,255,255,.01); grid-column: 1 / -1; }
         .empty-icon { font-size: 50px; margin-bottom: 12px; }
@@ -202,6 +204,15 @@
         .role-option:has(input:checked) { border-color: var(--primary); background: rgba(59,130,246,.12); }
         .form-note { color: var(--muted); font-size: 12px; margin-top: 10px; }
 
+        /* Cart Styles */
+        .cart-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; background: var(--bg-soft); border-radius: 14px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .cart-item img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
+        .cart-item-info { flex-grow: 1; }
+        .cart-item-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }
+        .cart-item-price { color: #34d399; font-weight: 900; font-size: 14px; }
+        .qty-control { display: flex; align-items: center; gap: 8px; background: var(--card); padding: 4px 10px; border-radius: 10px; border: 1px solid var(--border); }
+        .qty-control button { background: none; border: 0; color: white; font-weight: 900; cursor: pointer; font-size: 14px; }
+
         /* Toast notifications */
         .toast-container { position: fixed; left: 20px; bottom: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
         .toast { min-width: 280px; max-width: 380px; padding: 14px 18px; border-radius: 14px; background: #111827; border: 1px solid var(--border); box-shadow: var(--shadow); font-size: 14px; animation: toastIn .3s ease; }
@@ -227,7 +238,7 @@
 <body>
 
 <div class="announcement-bar">
-    <span>🔥 مرحباً بك في Abdo Store — منصة التجارة الإلكترونية الأولى في الجزائر للطلب المباشر عبر واتساب 🇩🇿</span>
+    <span>🔥 مرحباً بك في Abdo Store — أضف منتجاتك للسلة واطلبها مباشرة عبر واتساب 🇩🇿</span>
 </div>
 
 <header>
@@ -240,8 +251,9 @@
             </span>
         </a>
         <nav class="nav">
+            <button class="btn btn-success" id="openCartBtn">🛒 السلة <span class="cart-btn-badge" id="cartCountBadge">0</span></button>
             <button class="btn hidden" id="adminBtn">🏪 لوحة البائع</button>
-            <button class="btn hidden" id="vendorSettingsBtn">⚙️ إعدادات الواتساب</button>
+            <button class="btn hidden" id="vendorSettingsBtn">⚙️ الواتساب</button>
             <button class="btn" id="loginBtn">🔐 الدخول</button>
             <button class="btn btn-danger hidden" id="logoutBtn">خروج</button>
         </nav>
@@ -252,9 +264,9 @@
     <div class="container">
         <div class="hero-box">
             <div class="hero-content">
-                <span class="badge">🇩🇿 متجر متعدد البائعين • طلب مباشر</span>
+                <span class="badge">🇩🇿 تسوق واطلب بكل سهولة</span>
                 <h1>مرحبًا بك في <span class="gradient-text">Abdo Store</span></h1>
-                <p>تصفح منتجات البائعين وتواصل واطلب مباشرة عبر WhatsApp الخاص بكل تاجر بكل سهولة وأمان.</p>
+                <p>اختر ما يعجبك من المنتجات، أضفها إلى سلة المشتريات، وأرسل طلبك دفعة واحدة عبر واتساب.</p>
                 <div class="hero-actions">
                     <button class="btn btn-primary" id="startShopping">🛍️ ابدأ التسوق الان</button>
                     <button class="btn" id="heroLogin">🔐 حسابي / البائعين</button>
@@ -274,7 +286,6 @@
                 </div>
             </div>
 
-            <!-- Categories Filter -->
             <div class="categories-scroll" id="categoriesContainer">
                 <div class="cat-chip active" data-cat="all">🔥 الكل</div>
                 <div class="cat-chip" data-cat="ملابس">👕 ملابس</div>
@@ -306,10 +317,34 @@
 <footer>
     <div class="container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; color:var(--muted); font-size:13px;">
         <span>© 2026 Abdo Store — جميع الحقوق محفوظة</span>
-        <span>منصة تجارية إلكترونية جزائرية متطورة 🇩🇿</span>
+        <span>نظام السلة الإلكترونية المباشرة 🇩🇿</span>
         <span>صنع بـ ❤️ في الجزائر</span>
     </div>
 </footer>
+
+<!-- Cart Modal -->
+<div class="modal" id="cartModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>🛒 سلة المشتريات الخاصة بك</h3>
+            <button class="close" data-close="cartModal">×</button>
+        </div>
+        <div class="modal-content">
+            <div id="cartItemsContainer">
+                <!-- Cart items list dynamically -->
+            </div>
+            <div id="cartSummary" class="hidden" style="margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:18px; font-weight:900; margin-bottom:15px;">
+                    <span>المجموع الكلي:</span>
+                    <span id="cartTotalPrice" style="color:#34d399;">0 دج</span>
+                </div>
+                <button class="btn btn-success" id="checkoutWhatsappBtn" style="width:100%; padding:14px; font-size:16px; justify-content:center;">
+                    📱 إتمام الطلب وإرساله عبر واتساب
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Auth Modal -->
 <div class="modal" id="authModal">
@@ -340,7 +375,7 @@
                     </div>
                 </div>
                 <div class="form-group hidden" id="whatsappGroup">
-                    <label for="authWhatsapp">رقم الواتساب الخاص بك (لاستقبال طلبات الزبائن)</label>
+                    <label for="authWhatsapp">رقم الواتساب الخاص بك لاستقبال الطلبات</label>
                     <input class="input" id="authWhatsapp" type="text" placeholder="مثال: 213555xxxxxx">
                 </div>
                 <button class="btn btn-primary" id="authSubmit" type="submit" style="width:100%; padding: 13px;">تسجيل الدخول</button>
@@ -379,7 +414,7 @@
                 </div>
                 <div class="form-group">
                     <label for="productDesc">وصف المنتج (المقاسات، الألوان، التفاصيل)</label>
-                    <textarea class="input" id="productDesc" rows="3" placeholder="اكتب تفاصيل المنتج هنا لتشجيع الزبائن..."></textarea>
+                    <textarea class="input" id="productDesc" rows="3" placeholder="اكتب تفاصيل المنتج هنا..."></textarea>
                 </div>
                 <div class="form-group">
                     <label for="productImagesFile">صور المنتج (يمكنك اختيار عدة صور معاً)</label>
@@ -417,9 +452,7 @@
             <h3 id="detailModalTitle">تفاصيل المنتج</h3>
             <button class="close" data-close="productDetailsModal">×</button>
         </div>
-        <div class="modal-content" id="detailModalContent">
-            <!-- Dynamic Details -->
-        </div>
+        <div class="modal-content" id="detailModalContent"></div>
     </div>
 </div>
 
@@ -438,7 +471,8 @@ const state = {
     currentUser: null,
     role: "customer",
     authMode: "login",
-    activeCategory: "all"
+    activeCategory: "all",
+    cart: []
 };
 
 const $ = sel => document.querySelector(sel);
@@ -459,6 +493,8 @@ $("#loginBtn").addEventListener("click", () => showModal($("#authModal")));
 $("#heroLogin").addEventListener("click", () => showModal($("#authModal")));
 $("#startShopping").addEventListener("click", () => window.scrollTo({top: 650, behavior: 'smooth'}));
 $("#adminBtn").addEventListener("click", () => showModal($("#adminModal")));
+$("#openCartBtn").addEventListener("click", () => { renderCart(); showModal($("#cartModal")); });
+
 $("#vendorSettingsBtn").addEventListener("click", () => {
     if(state.currentUser) {
         $("#newVendorWhatsapp").value = state.currentUser.user_metadata?.whatsapp || "";
@@ -470,7 +506,6 @@ $$("[data-close]").forEach(btn => {
     btn.addEventListener("click", () => closeModal(document.getElementById(btn.dataset.close)));
 });
 
-// Category Chips click event
 $$(".cat-chip").forEach(chip => {
     chip.addEventListener("click", (e) => {
         $$(".cat-chip").forEach(c => c.classList.remove("active"));
@@ -495,7 +530,6 @@ $("#signupTab").addEventListener("click", () => {
     $("#signupTab").classList.add("active");
     $("#loginTab").classList.remove("active");
     $("#roleGroup").classList.remove("hidden");
-    
     const isVendor = document.querySelector('input[name="role"]:checked').value === 'vendor';
     if(isVendor) {
         $("#whatsappGroup").classList.remove("hidden");
@@ -519,7 +553,6 @@ document.querySelectorAll('input[name="role"]').forEach(radio => {
 $("#authForm").addEventListener("submit", async e => {
     e.preventDefault();
     if(!supabaseClient) return toast("Supabase غير متصل", "error");
-    
     const email = $("#authEmail").value;
     const password = $("#authPassword").value;
     
@@ -533,16 +566,9 @@ $("#authForm").addEventListener("submit", async e => {
         } else {
             const role = document.querySelector('input[name="role"]:checked').value;
             const whatsapp = $("#authWhatsapp").value.trim();
-            
             const { error } = await supabaseClient.auth.signUp({ 
-                email, 
-                password, 
-                options: { 
-                    data: { 
-                        role: role,
-                        whatsapp: role === 'vendor' ? whatsapp : null
-                    } 
-                } 
+                email, password, 
+                options: { data: { role: role, whatsapp: role === 'vendor' ? whatsapp : null } } 
             });
             if(error) throw error;
             toast("تم إنشاء الحساب بنجاح! يمكنك الدخول الآن ✅");
@@ -553,16 +579,11 @@ $("#authForm").addEventListener("submit", async e => {
     }
 });
 
-// Update Vendor WhatsApp Settings
 $("#vendorSettingsForm").addEventListener("submit", async e => {
     e.preventDefault();
     if(!supabaseClient) return;
     const newWhatsapp = $("#newVendorWhatsapp").value.trim();
-    
-    const { error } = await supabaseClient.auth.updateUser({
-        data: { whatsapp: newWhatsapp }
-    });
-    
+    const { error } = await supabaseClient.auth.updateUser({ data: { whatsapp: newWhatsapp } });
     if(error) {
         toast("خطأ في التحديث: " + error.message, "error");
     } else {
@@ -605,11 +626,7 @@ $("#logoutBtn").addEventListener("click", async () => {
 });
 
 async function fetchProducts() {
-    if(!supabaseClient) {
-        state.products = [];
-        renderProducts();
-        return;
-    }
+    if(!supabaseClient) { state.products = []; renderProducts(); return; }
     const { data, error } = await supabaseClient.from("market_products").select("*").order("id", { ascending: false });
     if(!error && data) {
         state.products = data;
@@ -638,7 +655,7 @@ function renderProducts() {
     container.innerHTML = "";
     
     if(!filtered.length) {
-        container.innerHTML = `<div class="empty"><div class="empty-icon">🔎</div><h3>عذراً، لا توجد منتجات مطابقة لبحثك</h3><p style="color:var(--muted); margin-top:5px;">جرب البحث بكلمات أخرى أو اختر قسماً مختلفاً</p></div>`;
+        container.innerHTML = `<div class="empty"><div class="empty-icon">🔎</div><h3>عذراً، لا توجد منتجات مطابقة لبحثك</h3></div>`;
         $("#resultCount").textContent = `0 منتج`;
         return;
     }
@@ -669,10 +686,6 @@ function renderProducts() {
             deleteBtnHtml = `<button class="btn btn-danger" style="width:100%; margin-top:8px; padding:7px; font-size:13px;" onclick="deleteProduct('${p.id}')">🗑️ حذف هذا المنتج</button>`;
         }
 
-        const vendorContact = p.whatsapp || p.vendor || "213600000000";
-        const whatsappMsg = encodeURIComponent(`السلام عليكم، أهتم بشراء هذا المنتج: ${p.title} بسعر ${p.price} دج - هل هو متوفر؟`);
-        const whatsappLink = `https://wa.me/${vendorContact.replace(/^0+/, '')}?text=${whatsappMsg}`;
-
         card.innerHTML = `
             <div>
                 <div class="product-image">
@@ -689,16 +702,14 @@ function renderProducts() {
                         <div class="price-row">
                             <span class="price">${p.price} دج</span>
                         </div>
-                        <a href="${whatsappLink}" target="_blank" class="btn-whatsapp-order">
-                            📱 اطلب عبر واتساب التاجر
-                        </a>
-                        <button class="btn" style="width:100%; padding:8px; font-size:13px;" onclick="openProductDetails('${p.id}')">🔍 عرض التفاصيل الكاملة</button>
+                        <button class="btn-add-cart" onclick="addToCart('${p.id}')">
+                            🛒 أضف إلى السلة
+                        </button>
+                        <button class="btn" style="width:100%; padding:8px; font-size:13px;" onclick="openProductDetails('${p.id}')">🔍 عرض التفاصيل</button>
                     </div>
                 </div>
             </div>
-            <div style="padding: 0 16px 16px 16px;">
-                ${deleteBtnHtml}
-            </div>
+            <div style="padding: 0 16px 16px 16px;">${deleteBtnHtml}</div>
         `;
         container.appendChild(card);
     });
@@ -716,7 +727,102 @@ window.changeMainImage = function(thumbElement, imageUrl) {
     thumbElement.classList.add("active");
 };
 
-// Open Product Full Details Modal
+// Cart Logic
+window.addToCart = function(productId) {
+    const p = state.products.find(item => item.id == productId);
+    if(!p) return;
+    
+    const existing = state.cart.find(item => item.id == productId);
+    if(existing) {
+        existing.qty += 1;
+    } else {
+        state.cart.push({ ...p, qty: 1 });
+    }
+    updateCartBadge();
+    toast(`تمت إضافة "${p.title}" إلى السلة بنجاح ✅`);
+};
+
+function updateCartBadge() {
+    const totalCount = state.cart.reduce((sum, item) => sum + item.qty, 0);
+    $("#cartCountBadge").textContent = totalCount;
+}
+
+function renderCart() {
+    const container = $("#cartItemsContainer");
+    const summary = $("#cartSummary");
+    
+    if(!state.cart.length) {
+        container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--muted);"><div style="font-size:40px; margin-bottom:10px;">🛒</div><p>سلة المشتريات فارغة حالياً.</p></div>`;
+        summary.classList.add("hidden");
+        return;
+    }
+    
+    summary.classList.remove("hidden");
+    container.innerHTML = "";
+    let totalPrice = 0;
+    
+    state.cart.forEach((item, index) => {
+        let rawImg = item.img || item.image_url;
+        let imgUrl = rawImg ? (rawImg.includes(",") ? rawImg.split(",")[0].trim() : rawImg.trim()) : "https://placehold.co/100";
+        let itemTotal = item.price * item.qty;
+        totalPrice += itemTotal;
+        
+        container.innerHTML += `
+            <div class="cart-item">
+                <img src="${imgUrl}" alt="${item.title}">
+                <div class="cart-item-info">
+                    <div class="cart-item-title">${item.title}</div>
+                    <div class="cart-item-price">${item.price} دج × ${item.qty} = ${itemTotal} دج</div>
+                </div>
+                <div class="qty-control">
+                    <button onclick="changeQty(${index}, -1)">-</button>
+                    <span>${item.qty}</span>
+                    <button onclick="changeQty(${index}, 1)">+</button>
+                </div>
+                <button class="btn btn-danger" style="padding:6px 10px; font-size:12px;" onclick="removeFromCart(${index})">🗑️</button>
+            </div>
+        `;
+    });
+    
+    $("#cartTotalPrice").textContent = `${totalPrice} دج`;
+}
+
+window.changeQty = function(index, delta) {
+    state.cart[index].qty += delta;
+    if(state.cart[index].qty <= 0) {
+        state.cart.splice(index, 1);
+    }
+    updateCartBadge();
+    renderCart();
+};
+
+window.removeFromCart = function(index) {
+    state.cart.splice(index, 1);
+    updateCartBadge();
+    renderCart();
+    toast("تم إزالة المنتج من السلة", "warning");
+};
+
+$("#checkoutWhatsappBtn").addEventListener("click", () => {
+    if(!state.cart.length) return;
+    
+    // افتراض أن الطلب يذهب لرقم أول منتج في السلة أو رقم افتراضي للتاجر
+    let vendorContact = state.cart[0].whatsapp || state.cart[0].vendor || "213600000000";
+    let message = `السلام عليكم، أود طلب المنتجات التالية من متجركم:\n\n`;
+    
+    let total = 0;
+    state.cart.forEach((item, idx) => {
+        let sub = item.price * item.qty;
+        total += sub;
+        message += `${idx + 1}. ${item.title} | الكمية: ${item.qty} | السعر: ${sub} دج\n`;
+    });
+    
+    message += `\n💰 المجموع الكلي: ${total} دج\nيرجى تأكيد الطلب وتفاصيل التوصيل. شكراً!`;
+    
+    let whatsappLink = `https://wa.me/${vendorContact.replace(/^0+/, '')}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappLink, '_blank');
+});
+
 window.openProductDetails = function(productId) {
     const p = state.products.find(item => item.id == productId);
     if(!p) return;
@@ -729,10 +835,6 @@ window.openProductDetails = function(productId) {
         imagesList = ["https://placehold.co/400"];
     }
 
-    const vendorContact = p.whatsapp || p.vendor || "213600000000";
-    const whatsappMsg = encodeURIComponent(`السلام عليكم، أهتم بشراء هذا المنتج: ${p.title} بسعر ${p.price} دج`);
-    const whatsappLink = `https://wa.me/${vendorContact.replace(/^0+/, '')}?text=${whatsappMsg}`;
-
     $("#detailModalTitle").textContent = p.title;
     
     let modalImgsHtml = `<div style="display:flex; gap:10px; overflow-x:auto; margin-bottom:15px; padding-bottom:5px;">`;
@@ -743,18 +845,18 @@ window.openProductDetails = function(productId) {
 
     $("#detailModalContent").innerHTML = `
         <div style="text-align:center; margin-bottom:15px;">
-            <img src="${imagesList[0].trim()}" id="modalMainImg" style="width:100%; max-height:300px; object-fit:contain; border-radius:16px; background:#000; padding:5px;">
+            <img src="${imagesList[0].trim()}" style="width:100%; max-height:300px; object-fit:contain; border-radius:16px; background:#000; padding:5px;">
         </div>
         ${modalImgsHtml}
         <div style="background:var(--bg-soft); padding:16px; border-radius:16px; margin-bottom:15px;">
             <span style="color:var(--primary); font-weight:800; font-size:12px;">تصنيف: ${p.category || 'عام'}</span>
             <h2 style="font-size:20px; margin:5px 0 10px 0;">${p.title}</h2>
             <div style="color:#34d399; font-size:24px; font-weight:900; margin-bottom:10px;">${p.price} دج</div>
-            <p style="color:var(--muted); font-size:14px; line-height:1.7;">${p.description || 'لا يوجد وصف تفصيلي لهذا المنتج حالياً.'}</p>
+            <p style="color:var(--muted); font-size:14px; line-height:1.7;">${p.description || 'لا يوجد وصف تفصيلي لهذا المنتج.'}</p>
         </div>
-        <a href="${whatsappLink}" target="_blank" class="btn-whatsapp-order" style="padding:14px; font-size:16px;">
-            📱 اطلب المنتج مباشرة عبر واتساب التاجر
-        </a>
+        <button class="btn-add-cart" style="padding:14px; font-size:16px;" onclick="addToCart('${p.id}'); closeModal(document.getElementById('productDetailsModal'));">
+            🛒 أضف هذا المنتج إلى السلة
+        </button>
     `;
 
     showModal($("#productDetailsModal"));
@@ -781,47 +883,33 @@ $("#productForm").addEventListener("submit", async e => {
     const category = $("#productCategory").value;
     const price = Number($("#productPrice").value);
     const description = $("#productDesc").value;
-    const fileInput = $("#productImagesFile");
-    const files = fileInput.files;
+    const files = $("#productImagesFile").files;
 
-    if(files.length === 0) return toast("يرجى اختيار صورة واحدة على الأقل للمنتج", "warning");
+    if(files.length === 0) return toast("يرجى اختيار صورة واحدة على الأقل", "warning");
 
     const vendorWhatsapp = state.currentUser?.user_metadata?.whatsapp || "213600000000";
-
-    toast("جاري رفع الصور ونشر المنتج في المتجر...", "warning");
+    toast("جاري رفع الصور ونشر المنتج...", "warning");
 
     try {
         let uploadedUrls = [];
-
         for(let i = 0; i < files.length; i++) {
             const file = files[i];
             const fileExt = file.name.split('.').pop();
             const fileName = `${Date.now()}_${i}.${fileExt}`;
             const filePath = `public/${fileName}`;
 
-            const { error: uploadError } = await supabaseClient.storage
-                .from('products')
-                .upload(filePath, file);
-
+            const { error: uploadError } = await supabaseClient.storage.from('products').upload(filePath, file);
             if(uploadError) throw uploadError;
 
-            const { data: publicUrlData } = supabaseClient.storage
-                .from('products')
-                .getPublicUrl(filePath);
-
+            const { data: publicUrlData } = supabaseClient.storage.from('products').getPublicUrl(filePath);
             uploadedUrls.push(publicUrlData.publicUrl);
         }
 
         const imagesString = uploadedUrls.join(",");
-
         const { error: insertError } = await supabaseClient.from("market_products").insert([
             { 
-                title: title, 
-                category: category,
-                price: price, 
-                description: description,
-                img: imagesString, 
-                image_url: uploadedUrls[0],
+                title, category, price, description,
+                img: imagesString, image_url: uploadedUrls[0],
                 whatsapp: vendorWhatsapp,
                 user_id: state.currentUser ? state.currentUser.id : null 
             }
