@@ -286,7 +286,6 @@
                         <label class="role-option"><input type="radio" name="role" value="vendor"> 🏪 بائع</label>
                     </div>
                 </div>
-                <!-- حقل الواتساب يظهر عند إنشاء حساب للبائع فقط -->
                 <div class="form-group hidden" id="whatsappGroup">
                     <label for="authWhatsapp">رقم الواتساب الخاص بك (لاستقبال الطلبات)</label>
                     <input class="input" id="authWhatsapp" type="text" placeholder="مثال: 213555xxxxxx">
@@ -316,7 +315,6 @@
                     <label for="productPrice">السعر بالدينار</label>
                     <input class="input" id="productPrice" type="number" min="1" required placeholder="2500">
                 </div>
-                <!-- تم حذف خانة الواتساب من هنا لأنه يُسحب أوتوماتيكياً من الحساب -->
                 <div class="form-group">
                     <label for="productImagesFile">صور المنتج (يمكنك اختيار عدة صور)</label>
                     <input class="input" id="productImagesFile" type="file" accept="image/*" multiple required>
@@ -469,7 +467,6 @@ $("#logoutBtn").addEventListener("click", async () => {
     toast("تم تسجيل الخروج 👋");
 });
 
-// الجلب من جدول market_products الخاص بك
 async function fetchProducts() {
     if(!supabaseClient) {
         state.products = [];
@@ -485,14 +482,27 @@ async function fetchProducts() {
 
 function renderProducts() {
     const container = $("#productsContainer");
+    const searchTerm = $("#searchInput").value.trim().toLowerCase();
+    const sortBy = $("#sortSelect").value;
+
+    let filtered = state.products.filter(p => p.title.toLowerCase().includes(searchTerm));
+
+    filtered.sort((a, b) => {
+        if(sortBy === 'newest') return b.id - a.id;
+        if(sortBy === 'price-low') return a.price - b.price;
+        if(sortBy === 'price-high') return b.price - a.price;
+        if(sortBy === 'name') return a.title.localeCompare(b.title);
+    });
+
     container.innerHTML = "";
     
-    if(!state.products.length) {
-        container.innerHTML = `<div class="empty"><div class="empty-icon">🔎</div><h3>لا توجد منتجات حالياً</h3></div>`;
+    if(!filtered.length) {
+        container.innerHTML = `<div class="empty"><div class="empty-icon">🔎</div><h3>لا توجد منتجات مطابقة للبحث</h3></div>`;
+        $("#resultCount").textContent = `0 منتج`;
         return;
     }
 
-    state.products.forEach(p => {
+    filtered.forEach(p => {
         let imagesList = [];
         const rawImg = p.img || p.image_url;
         if(rawImg) {
@@ -514,11 +524,10 @@ function renderProducts() {
         }
 
         let deleteBtnHtml = "";
-        if(state.role === "vendor") {
+        if(state.role === "vendor" && (p.user_id === state.currentUser?.id || !p.user_id)) {
             deleteBtnHtml = `<button class="btn btn-danger" style="width:100%; margin-top:8px; padding:6px; font-size:13px;" onclick="deleteProduct('${p.id}')">🗑️ حذف المنتج</button>`;
         }
 
-        // دعم حقل whatsapp أو vendor من جدول market_products
         const vendorContact = p.whatsapp || p.vendor || "213600000000";
         const whatsappMsg = encodeURIComponent(`السلام عليكم، أهتم بشراء هذا المنتج: ${p.title} بسعر ${p.price} دج`);
         const whatsappLink = `https://wa.me/${vendorContact.replace(/^0+/, '')}?text=${whatsappMsg}`;
@@ -547,8 +556,11 @@ function renderProducts() {
         `;
         container.appendChild(card);
     });
-    $("#resultCount").textContent = `${state.products.length} منتج`;
+    $("#resultCount").textContent = `${filtered.length} منتج`;
 }
+
+$("#searchInput").addEventListener("input", renderProducts);
+$("#sortSelect").addEventListener("change", renderProducts);
 
 window.changeMainImage = function(thumbElement, imageUrl) {
     const card = thumbElement.closest(".product-card");
@@ -582,7 +594,6 @@ $("#productForm").addEventListener("submit", async e => {
 
     if(files.length === 0) return toast("يرجى اختيار صورة واحدة على الأقل", "warning");
 
-    // سحب رقم الواتساب الخاص بالتاجر من حسابه المسجل مسبقاً تلقائياً
     const vendorWhatsapp = state.currentUser?.user_metadata?.whatsapp || "213600000000";
 
     toast("جاري رفع الصور ونشر المنتج...", "warning");
@@ -611,7 +622,6 @@ $("#productForm").addEventListener("submit", async e => {
 
         const imagesString = uploadedUrls.join(",");
 
-        // إدخال البيانات في جدول market_products مع الرقم التلقائي
         const { error: insertError } = await supabaseClient.from("market_products").insert([
             { 
                 title: title, 
